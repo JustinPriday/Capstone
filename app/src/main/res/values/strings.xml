@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Equestri-X</string>
+
+    <string name="course_list_no_courses">No Courses.</string>
+
+    <string name="course_create_start_button">Start Recording</string>
+    <string name="course_create_finish_button">Finish Recording</string>
+    <string name="course_create_save_button">Save Course</string>
+    <string name="course_create_cancel_button">Cancel Course</string>
+
+
+
+
+    <string name="course_review_previous_button">&lt;&lt;</string>
+    <string name="course_review_next_button">&gt;&gt;</string>
+</resources>

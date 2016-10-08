@@ -1,0 +1,15 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="list_backdrop_height">100dp</dimen>
+
+    <dimen name="create_card_margins">10dp</dimen>
+    <dimen name="create_card_corner_radius">10dp</dimen>
+
+    <dimen name="optimum_time_button_text_size">22sp</dimen>
+
+    <dimen name="fab_margin">16dp</dimen>
+
+</resources>
