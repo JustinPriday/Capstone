@@ -5,7 +5,6 @@
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/AppTheme"
     tools:context="com.justinpriday.nanodegree.capstone.CourseCreateFragment">
 
     <android.support.v7.widget.Toolbar
@@ -34,33 +33,30 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="3"
+                    android:layout_weight="9"
                     android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/overview_course_image"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:layout_margin="10dp"
+                        android:contentDescription="@string/course_overview_course_image_contentdescription"
+                        android:background="#DDDDDD"/>
+
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="2">
-
-                        <ImageView
-                            android:id="@+id/overview_course_image"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_margin="10dp"
-                            android:contentDescription="@string/course_overview_course_image_contentdescription"
-                            android:background="#DDDDDD"/>
-
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="4"
+                        android:layout_weight="5"
                         android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="2"
+                            android:layout_height="48dp"
                             android:orientation="horizontal">
+
                             <com.lb.auto_fit_textview.AutoResizeTextView
                                 android:id="@+id/overview_course_name"
                                 android:layout_width="0dp"
@@ -75,29 +71,45 @@
                                 android:layout_height="48dp"
                                 android:src="@drawable/ic_delete_icon"
                                 android:contentDescription="@string/course_overview_delete_button_contentdescription"
-                                android:background="@android:color/transparent"/>
+                                android:background="@android:color/transparent" />
+
 
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
-                            android:layout_weight="3"
+                            android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/overview_date_text"
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/overview_distance_time"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
+                                <TextView
+                                    android:id="@+id/overview_date_text"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"/>
+
+                                <TextView
+                                    android:id="@+id/overview_distance_time"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/overview_keypoints_flagged"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" />
+
+                            <TextView
+                                android:id="@+id/overview_description"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="5dp"/>
 
                         </LinearLayout>
 
@@ -108,33 +120,20 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="6">
-                    <TextView
-                        android:id="@+id/overview_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"/>
-
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
                     android:layout_weight="4"
                     android:background="#999999"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
                     <Button
                         android:id="@+id/overview_review_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="@string/course_overview_review_button"/>
 
                     <Button
                         android:id="@+id/overview_compete_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="@string/course_overview_compete_button"/>
 

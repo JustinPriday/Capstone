@@ -27,6 +27,7 @@
                     android:id="@+id/keypoint_image_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/course_create_keypoint_image_contentdescription"
                     android:background="#CCCCCC"/>
 
                 <ImageButton
@@ -34,10 +35,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="fitXY"
+                    android:contentDescription="@string/course_create_keypoint_image_contentdescription"
                     android:background="@android:color/transparent"/>
 
                 <TextView
-                    android:text="Take Photo"
+                    android:text="@string/course_create_take_photo_tag"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginBottom="5dp"
@@ -60,7 +62,7 @@
                     android:imeOptions="actionDone"
                     android:inputType="textCapSentences"
                     android:layout_margin="4dp"
-                    android:hint="Title"
+                    android:hint="@string/course_create_keypoint_title_hint"
                     android:textColorHint="#DDDDDD"/>
 
                 <CheckBox
@@ -68,7 +70,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="-10dp"
-                    android:text="Flagged"/>
+                    android:text="@string/course_create_flagged_checkbox_text"/>
 
                 <TextView
                     android:id="@+id/keypoint_info"
@@ -90,7 +92,7 @@
                 android:id="@+id/keypoint_description_edit"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Enter Description"
+                android:hint="@string/course_create_keypoint_description_hint"
                 android:textColorHint="#DDDDDD"
                 android:background="#EEEEEE"
                 android:padding="5dp"
@@ -114,7 +116,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_margin="0dp"
-                android:text="Done"/>
+                android:text="@string/course_create_keypoint_done_button_text"/>
 
         </LinearLayout>
 

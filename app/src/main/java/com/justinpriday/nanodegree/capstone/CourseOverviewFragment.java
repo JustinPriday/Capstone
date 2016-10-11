@@ -1,11 +1,10 @@
 package com.justinpriday.nanodegree.capstone;
 
 
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -22,21 +21,19 @@ import android.widget.Toast;
 import com.justinpriday.nanodegree.capstone.Data.CourseContract;
 import com.justinpriday.nanodegree.capstone.Loaders.CourseCollectorTask;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
-import com.justinpriday.nanodegree.capstone.Widget.LastCourseWidget;
+
+import java.text.DateFormat;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-
-/**
- * A simple {@link Fragment} subclass.
- */
 public class CourseOverviewFragment extends Fragment implements CourseCollectorTask.CourseCallBack {
     private static final String LOG_TAG = CourseOverviewFragment.class.getSimpleName();
 
-    CourseData mCurrentCourse = null;
-    Context mContext = null;
+    private CourseData mCurrentCourse = null;
+    private Context mContext = null;
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -47,6 +44,28 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     @Bind(R.id.overview_course_name)
     TextView courseName;
 
+    @Bind(R.id.overview_date_text)
+    TextView courseDate;
+
+    @Bind(R.id.overview_distance_time)
+    TextView courseDistanceTime;
+
+    @Bind(R.id.overview_keypoints_flagged)
+    TextView courseKeyPoints;
+
+    @Bind(R.id.overview_description)
+    TextView courseDescription;
+
+    private  static final String CURRENT_COURSE_KEY = "current_course";
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putParcelable(CURRENT_COURSE_KEY,mCurrentCourse);
+
+        super.onSaveInstanceState(outState);
+    }
 
     public CourseOverviewFragment() {
         // Required empty public constructor
@@ -56,15 +75,21 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getActivity().getIntent().getExtras() != null) {
-            long movieID = getActivity().getIntent().getExtras().getLong(CourseData.COURSE_DATA_ID_KEY);
-            if (movieID > 0) {
-                CourseCollectorTask courseCollector = new CourseCollectorTask(mContext,this);
-                Long[] params = new Long[1];
-                params[0] = (Long)movieID;
-                courseCollector.execute(params);
+        if (savedInstanceState != null){
+            mCurrentCourse = savedInstanceState.getParcelable(CURRENT_COURSE_KEY);
+        } else {
+            if (getActivity().getIntent().getExtras() != null) {
+                long movieID = getActivity().getIntent().getExtras().getLong(CourseData.COURSE_DATA_ID_KEY);
+                if (movieID > 0) {
+                    CourseCollectorTask courseCollector = new CourseCollectorTask(mContext,this);
+                    Long[] params = new Long[1];
+                    params[0] = (Long)movieID;
+                    courseCollector.setNoLocations();
+                    courseCollector.execute(params);
+                }
             }
         }
+
     }
 
         @Override
@@ -85,6 +110,14 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (mCurrentCourse != null) {
+            updateCourseDisplay();
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         mContext = context;
@@ -93,6 +126,13 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     private void updateCourseDisplay() {
         courseImage.setImageBitmap(mCurrentCourse.courseImage);
         courseName.setText(mCurrentCourse.courseName);
+        DateFormat f = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
+        courseDate.setText(f.format(mCurrentCourse.courseDate));
+        int courseMinutes = (int)(mCurrentCourse.courseIdealTime / 60);
+        int courseSeconds = (int)(mCurrentCourse.courseIdealTime - (courseMinutes * 60));
+        courseDistanceTime.setText(mCurrentCourse.courseDistance+"m ("+courseMinutes+":"+courseSeconds+")");
+        courseKeyPoints.setText(mCurrentCourse.courseKeyPointCount+" points ("+mCurrentCourse.courseFlaggedCount+" flagged)");
+        courseDescription.setText(mCurrentCourse.courseDescription);
     }
 
     @Override
@@ -147,8 +187,8 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     }
 
     public interface CallBack {
-        public void onReviewCourseSelected(long courseID);
-        public void onCompeteCourseSelected(long courseID);
+        void onReviewCourseSelected(long courseID);
+        void onCompeteCourseSelected(long courseID);
     }
 
     @OnClick(R.id.overview_review_button)

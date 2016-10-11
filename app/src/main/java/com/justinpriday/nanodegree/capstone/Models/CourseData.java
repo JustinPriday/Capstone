@@ -91,11 +91,13 @@ public class CourseData implements Parcelable{
         courseName = cursor.getString(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_NAME));
         courseDate = new Date (cursor.getLong(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_DATE)));
         courseDescription = cursor.getString(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_DESCRIPTION));
-        byte[] byteArray  = cursor.getBlob(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_IMAGE));
-        if (byteArray != null) {
-            courseImage = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        } else {
-            courseImage = null;
+        if (cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_IMAGE) > -1) {
+            byte[] byteArray = cursor.getBlob(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_IMAGE));
+            if (byteArray != null) {
+                courseImage = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            } else {
+                courseImage = null;
+            }
         }
         courseDistance = cursor.getInt(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_DISTANCE));
         courseIdealTime = cursor.getInt(cursor.getColumnIndex(CourseContract.CourseEntry.COLUMN_COURSE_IDEAL_TIME));
@@ -138,8 +140,6 @@ public class CourseData implements Parcelable{
         dest.writeInt(courseFlaggedCount);
         dest.writeTypedList(courseLocations);
         Log.d(LOG_TAG,"Got Parcel with size "+dest.dataSize());
-
-        ;
     }
 
     public ContentValues getContentValues() {

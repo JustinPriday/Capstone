@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item app:showAsAction="always"
+        android:icon="@drawable/gps_status_off"
+        android:id="@+id/gps_status_item"
+        android:title="GPS Status"
+        android:enabled="false"/>
+
+    <item
+        android:title="@string/map_menu_title"
+        android:orderInCategory="100"
+        android:id="@+id/sort_menu">
+
+        <menu>
+            <item
+                android:title="@string/map_menu_type_normal"
+                android:orderInCategory="100"
+                app:showAsAction="always"
+                android:id="@+id/menu_map_item_normal"/>
+
+            <item
+                android:title="@string/map_menu_type_satellite"
+                android:orderInCategory="100"
+                app:showAsAction="always"
+                android:id="@+id/menu_map_item_satellite"/>
+
+            <item
+                android:title="@string/map_menu_type_hybrid"
+                android:orderInCategory="100"
+                app:showAsAction="always"
+                android:id="@+id/menu_map_item_hybrid"/>
+            <item
+                android:title="@string/map_menu_type_terrain"
+                android:orderInCategory="100"
+                app:showAsAction="always"
+                android:id="@+id/menu_map_item_terrain"/>
+        </menu>
+    </item>
+</menu>

@@ -23,15 +23,15 @@ public class CourseContentProvider extends ContentProvider {
 
     public static final String ACTION_DATA_UPDATED = "com.justinpriday.nanodegree.capstone.ACTION_DATA_UPDATED";
 
-    SQLiteDatabase db;
-    CourseDBHelper dbHelper;
+    private SQLiteDatabase db;
+    private CourseDBHelper dbHelper;
 
     private final static UriMatcher uriMatcher = buildUriMatcher();
 
-    final static int COURSES = 100;
-    final static int COURSE_WITH_ID = 101;
-    final static int LOCATIONS = 200;
-    final static int KEY_POINTS = 300;
+    private final static int COURSES = 100;
+    private final static int COURSE_WITH_ID = 101;
+    private final static int LOCATIONS = 200;
+    private final static int KEY_POINTS = 300;
 
     @Override
     public boolean onCreate() {
@@ -39,7 +39,7 @@ public class CourseContentProvider extends ContentProvider {
         return true;
     }
 
-    static UriMatcher buildUriMatcher() {
+    private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(CourseContract.CONTENT_AUTHORITY, CourseContract.PATH_COURSE, COURSES);
         matcher.addURI(CourseContract.CONTENT_AUTHORITY, CourseContract.PATH_LOCATION, LOCATIONS);

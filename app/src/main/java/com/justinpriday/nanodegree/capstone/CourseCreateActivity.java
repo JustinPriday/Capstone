@@ -24,7 +24,7 @@ import java.util.Date;
 
 public class CourseCreateActivity extends AppCompatActivity implements CourseCreateFragment.OnFragmentInteractionListener,CourseCreateFragment.CallBack {
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final String LOG_TAG = CourseCreateActivity.class.getSimpleName();
     private File mFileName;
 
@@ -149,12 +149,10 @@ public class CourseCreateActivity extends AppCompatActivity implements CourseCre
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "FOO_" + timeStamp + "_image";
 
-        File image = File.createTempFile(
+        return File.createTempFile(
                 imageFileName,
                 fileExtensionToUse,
                 storageDir
         );
-
-        return image;
     }
 }

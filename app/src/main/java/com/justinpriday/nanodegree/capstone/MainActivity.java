@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements CourseListFragmen
                     Intent intent = new Intent(this, CourseOverviewActivity.class);
                     intent.putExtra(CourseData.COURSE_DATA_ID_KEY, cursor.getLong(cursor.getColumnIndex(CourseContract.CourseEntry._ID)));
                     intent.setAction(action);
+                    cursor.close();
                     startActivity(intent);
                 }
             }

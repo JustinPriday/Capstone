@@ -21,14 +21,25 @@ public class CourseCollectorTask extends AsyncTask<Long, Void, CourseData> {
 
     private static final String LOG_TAG = CourseCollectorTask.class.getSimpleName();
 
-    Context mContext = null;
-    CourseCallBack mCallback = null;
+    private Context mContext = null;
+    private CourseCallBack mCallback = null;
 
-    CourseData collectedCourse = null;
+    private CourseData collectedCourse = null;
+
+    private boolean mNoLocations = false;
+    private boolean mNoPhotoCollect = false;
 
     public CourseCollectorTask(Context context, CourseCallBack callBack) {
         mContext = context;
         mCallback = callBack;
+    }
+
+    public void setNoPhotos() {
+        mNoPhotoCollect = true;
+    }
+
+    public void setNoLocations() {
+        mNoLocations = true;
     }
 
     public interface CourseCallBack {
@@ -52,9 +63,23 @@ public class CourseCollectorTask extends AsyncTask<Long, Void, CourseData> {
         Log.d(LOG_TAG,"Course Task do in background");
         String[] selectArgs = new String[1];
         selectArgs[0] = params[0].toString();
+        String[] projection = null;
+        if (mNoPhotoCollect) {
+            projection = new String[] {
+                CourseContract.CourseEntry._ID,
+                CourseContract.CourseEntry.COLUMN_COURSE_NAME,
+                CourseContract.CourseEntry.COLUMN_COURSE_DATE,
+                CourseContract.CourseEntry.COLUMN_COURSE_DESCRIPTION,
+                CourseContract.CourseEntry.COLUMN_COURSE_DISTANCE,
+                CourseContract.CourseEntry.COLUMN_COURSE_IDEAL_TIME,
+                CourseContract.CourseEntry.COLUMN_COURSE_LOCATION_COUNT,
+                CourseContract.CourseEntry.COLUMN_COURSE_KEY_POINT_COUNT,
+                CourseContract.CourseEntry.COLUMN_COURSE_FLAGGED_COUNT
+            };
+        }
         Cursor courseCursor = mContext.getContentResolver().query(
                 CourseContract.CourseEntry.CONTENT_URI,
-                null,
+                projection,
                 CourseContract.CourseEntry._ID+"=?",
                 selectArgs,
                 null
@@ -67,9 +92,19 @@ public class CourseCollectorTask extends AsyncTask<Long, Void, CourseData> {
             courseCursor.close();
         }
 
-        if (collectedCourse != null) {
+        if ((collectedCourse != null) && (!mNoLocations)) {
             //have a course, collect locations, course ID still in selectArgs
             collectedCourse.courseLocations = new ArrayList<CourseLocationData>();
+            projection = null;
+            if (mNoPhotoCollect) {
+                projection = new String[]{
+                    CourseContract.KeyPointEntry._ID,
+                    CourseContract.KeyPointEntry.COLUMN_KEY_LOCATION,
+                    CourseContract.KeyPointEntry.COLUMN_KEY_TITLE,
+                    CourseContract.KeyPointEntry.COLUMN_KEY_DESCRIPTION,
+                    CourseContract.KeyPointEntry.COLUMN_KEY_FLAGGED
+                };
+            }
             Cursor locationCursor = mContext.getContentResolver().query(
                 CourseContract.LocationEntry.CONTENT_URI,
                     null,
@@ -84,7 +119,7 @@ public class CourseCollectorTask extends AsyncTask<Long, Void, CourseData> {
                         selectArgs[0] = String.valueOf(tLoc.id);
                         Cursor kpCursor = mContext.getContentResolver().query(
                                 CourseContract.KeyPointEntry.CONTENT_URI,
-                                null,
+                                projection,
                                 CourseContract.KeyPointEntry.COLUMN_KEY_LOCATION + "=?",
                                 selectArgs,
                                 null

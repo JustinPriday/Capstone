@@ -9,11 +9,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.vision.text.Text;
 import com.justinpriday.nanodegree.capstone.CourseListFragment;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
 import com.justinpriday.nanodegree.capstone.R;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,6 +33,7 @@ public class CourseListAdapter extends RecyclerView.Adapter<CourseListAdapter.Vi
         public long courseID;
         @Bind(R.id.item_course_image) ImageView courseImage;
         @Bind(R.id.item_course_name) TextView courseName;
+        @Bind(R.id.item_course_date) TextView courseDate;
         @Bind(R.id.item_course_description) TextView courseDescription;
 
         public ViewHolder(View itemView) {
@@ -38,7 +43,7 @@ public class CourseListAdapter extends RecyclerView.Adapter<CourseListAdapter.Vi
     }
 
     public interface CallBack {
-        public void onCourseSelectedWithId(long id);
+        void onCourseSelectedWithId(long id);
     }
 
     private List<CourseData> mCourses;
@@ -67,9 +72,7 @@ public class CourseListAdapter extends RecyclerView.Adapter<CourseListAdapter.Vi
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View courseView = inflater.inflate(R.layout.item_course, parent, false);
-        ViewHolder viewHolder = new ViewHolder(courseView);
-
-        return viewHolder;
+        return new ViewHolder(courseView);
     }
 
     @Override
@@ -78,6 +81,8 @@ public class CourseListAdapter extends RecyclerView.Adapter<CourseListAdapter.Vi
         holder.courseID = course.id;
         holder.courseImage.setImageBitmap(course.courseImage);
         holder.courseName.setText(course.courseName);
+        DateFormat f = DateFormat.getDateInstance(DateFormat.SHORT,Locale.getDefault());
+        holder.courseDate.setText(f.format(course.courseDate));
         holder.courseDescription.setText(course.courseDescription);
         holder.itemView.setTag(holder);
         holder.itemView.setOnClickListener(new View.OnClickListener() {

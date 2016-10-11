@@ -15,6 +15,9 @@ import com.justinpriday.nanodegree.capstone.MainActivity;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
 import com.justinpriday.nanodegree.capstone.R;
 
+import java.text.DateFormat;
+import java.util.Locale;
+
 /**
  * Created by justin on 2016/10/07.
  */
@@ -45,20 +48,28 @@ public class CourseWidgetIntentService extends IntentService {
         if (cursor.moveToFirst()) {
             Log.d(LOG_TAG, "Got New Data");
             mCurrentCourse = new CourseData(cursor);
-
+            cursor.close();
         }
+
 
         for (int appWidgetId : appWidgetIds) {
             int layoutId = R.layout.course_widget;
 
             RemoteViews remoteViews = new RemoteViews(getPackageName(), layoutId);
-            remoteViews.setTextViewText(R.id.widget_header, mCurrentCourse.courseName);
 
             remoteViews.setImageViewBitmap(R.id.widget_course_image,mCurrentCourse.courseImage);
+            remoteViews.setTextViewText(R.id.widget_course_name, mCurrentCourse.courseName);
+            DateFormat f = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
+            remoteViews.setTextViewText(R.id.widget_course_date, f.format(mCurrentCourse.courseDate));
+            int courseMinutes = (int)(mCurrentCourse.courseIdealTime / 60);
+            int courseSeconds = (int)(mCurrentCourse.courseIdealTime - (courseMinutes * 60));
+            remoteViews.setTextViewText(R.id.widget_course_distance, mCurrentCourse.courseDistance+"m ("+courseMinutes+":"+courseSeconds+")");
+            remoteViews.setTextViewText(R.id.widget_course_flagged, mCurrentCourse.courseKeyPointCount+" points ("+mCurrentCourse.courseFlaggedCount+" flagged)");
+            remoteViews.setTextViewText(R.id.widget_course_description, mCurrentCourse.courseDescription);
 
             remoteViews.setOnClickPendingIntent(R.id.widget_icon_button, getPendingIntent(this, null));
-            remoteViews.setOnClickPendingIntent(R.id.course_widget_button_1, getPendingIntent(this, LastCourseWidget.REVIEW_CLICKED));
-            remoteViews.setOnClickPendingIntent(R.id.course_widget_button_2, getPendingIntent(this, LastCourseWidget.COMPETE_CLICKED));
+            remoteViews.setOnClickPendingIntent(R.id.course_widget_review_button, getPendingIntent(this, LastCourseWidget.REVIEW_CLICKED));
+            remoteViews.setOnClickPendingIntent(R.id.course_widget_compete_button, getPendingIntent(this, LastCourseWidget.COMPETE_CLICKED));
 
 
 

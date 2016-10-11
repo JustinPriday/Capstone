@@ -52,7 +52,6 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:text=":"
                     android:gravity="center"
                     android:textSize="32sp"/>
@@ -115,7 +114,7 @@
 
         <Button
             android:id="@+id/optimum_time_done_button"
-            android:text="Done"
+            android:text="@string/course_create_optimum_time_done_button"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>

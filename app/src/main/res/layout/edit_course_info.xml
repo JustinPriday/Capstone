@@ -27,17 +27,19 @@
                     android:id="@+id/course_image_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/course_create_image_contentdescription"
                     android:background="#CCCCCC"/>
 
                 <ImageButton
                     android:id="@+id/take_course_picture_button"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/course_create_image_contentdescription"
                     android:scaleType="fitXY"
                     android:background="@android:color/transparent"/>
 
                 <TextView
-                    android:text="Take Photo"
+                    android:text="@string/course_create_take_photo_tag"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginBottom="5dp"
@@ -61,7 +63,7 @@
                     android:imeOptions="actionDone"
                     android:inputType="textCapSentences"
                     android:layout_margin="4dp"
-                    android:hint="Enter Course Name"
+                    android:hint="@string/course_create_name_hint"
                     android:textColorHint="#DDDDDD"/>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -97,6 +99,7 @@
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:src="@drawable/ic_optimum_timer"
+                            android:contentDescription="@string/course_create_optimum_time_button_contentdescription"
                             android:background="@android:color/transparent"/>
                     </RelativeLayout>
                 </LinearLayout>
@@ -113,7 +116,7 @@
                 android:id="@+id/course_description_edit"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Enter Course Description"
+                android:hint="@string/course_create_description_hint"
                 android:textColorHint="#DDDDDD"
                 android:background="#EEEEEE"
                 android:padding="5dp"
@@ -136,7 +139,7 @@
                 android:id="@+id/course_create_action_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:layout_margin="0dp"
                 android:text="@string/course_create_start_button"/>
 
@@ -144,9 +147,18 @@
                 android:id="@+id/course_create_cancel_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:layout_margin="0dp"
                 android:text="@string/course_create_cancel_button"
+                android:visibility="gone"/>
+
+            <ImageButton
+                android:id="@+id/course_create_pause_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@android:drawable/ic_media_pause"
+                android:elevation="2dp"
                 android:visibility="gone"/>
 
         </LinearLayout>

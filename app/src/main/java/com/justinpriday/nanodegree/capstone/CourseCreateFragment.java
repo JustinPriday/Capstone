@@ -5,18 +5,22 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.GpsSatellite;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +28,8 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +40,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,6 +69,7 @@ import com.justinpriday.nanodegree.capstone.Data.CourseContract;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
 import com.justinpriday.nanodegree.capstone.Models.CourseKeyPointData;
 import com.justinpriday.nanodegree.capstone.Models.CourseLocationData;
+import com.justinpriday.nanodegree.capstone.Utility.PrefKeys;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,41 +83,41 @@ import butterknife.OnTextChanged;
 
 public class CourseCreateFragment extends Fragment
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        LocationListener, OnMapReadyCallback, Animation.AnimationListener {
+        LocationListener, OnMapReadyCallback, Animation.AnimationListener, android.location.GpsStatus.Listener {
 
     private OnFragmentInteractionListener mListener;
 
     private static final int MINIMUM_GPS = 20;
-    private static final int GPS_UPDATE_DISTANCE = 5;
+    private static final int GPS_UPDATE_DISTANCE = 10;
     private static final int GPS_UPDATE_PERIOD = 1000;
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private static final String LOG_TAG = CourseCreateFragment.class.getSimpleName();
     private Context mContext;
 
-    public static final String LAST_SAVED_LOCATION_KEY = "last_saved_location";
-    public static final String LOCATION_COUNT_KEY = "location_count";
-    public static final String LOCATION_DISTANCE_KEY = "location_distance";
-    public static final String CURRENT_COURSE_KEY = "current_course";
-    public static final String COURSE_RECORDING_KEY = "course_recording";
-    public static final String COURSE_COMPLETED_KEY = "course_completed";
+    private static final String LAST_SAVED_LOCATION_KEY = "last_saved_location";
+    private static final String LOCATION_COUNT_KEY = "location_count";
+    private static final String LOCATION_DISTANCE_KEY = "location_distance";
+    private static final String CURRENT_COURSE_KEY = "current_course";
+    private static final String COURSE_RECORDING_KEY = "course_recording";
+    private static final String COURSE_PAUSED_KEY = "course_recording";
+    private static final String COURSE_COMPLETED_KEY = "course_completed";
+
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private LocationManager mLocationManager;
 
     private GoogleMap mMap;
-    MapView mapView;
+    private MapView mapView;
     private boolean mapReady = false;
 
-    Circle mLocationCircle;
+    private Circle mLocationCircle;
     private Polyline coursePoly = null;
 
     private Location mLastLocation;
     private Location mLastSavedLocation;
     private int mLocationCount;
     private float mLocationDistance;
-    private LocationManager mLocationManager;
     private boolean courseRecording = false;
     private boolean courseCompleted = false;
     private boolean courseRecordingPaused = false;
@@ -118,6 +126,9 @@ public class CourseCreateFragment extends Fragment
     private Marker endMarker = null;
     private CourseData mCurrentCourse = null;
     private CourseKeyPointData mEditingPoint = null;
+
+    private int mSatellites = 0;
+    private int mSatellitesInFix = 0;
 
     private boolean endingOptimumTimeAnimation = false;
 
@@ -144,7 +155,7 @@ public class CourseCreateFragment extends Fragment
     @Bind(R.id.course_name_edit)
     EditText courseNameEdit;
 
-    @Bind (R.id.course_description_edit)
+    @Bind(R.id.course_description_edit)
     EditText courseDescriptionEdit;
 
     @Bind(R.id.course_create_action_button)
@@ -152,6 +163,12 @@ public class CourseCreateFragment extends Fragment
 
     @Bind(R.id.course_create_cancel_button)
     Button cancelCourseButton;
+
+    @Bind(R.id.course_create_pause_button)
+    ImageButton pauseCourseButton;
+
+    @Bind(R.id.course_recording_paused)
+    TextView recordingPausedIndicator;
 
     @Bind(R.id.add_key_fab)
     FloatingActionButton addObstacleButton;
@@ -189,6 +206,8 @@ public class CourseCreateFragment extends Fragment
     @Bind(R.id.optimum_time_secl_text)
     TextView optimumTimeSecLText;
 
+    MenuItem gpsMenuItem = null;
+
     //endregion
 
     //region animation listeners
@@ -214,17 +233,57 @@ public class CourseCreateFragment extends Fragment
 
     }
 
+    @Override
+    public void onGpsStatusChanged(int event) {
+        // Used for providing user with GPS fix status feedback. Has the unintented side effect of
+        // greatly reducing time taken to get a usable GPS location.
+        // Deprecated for API 24. Look at updating to GnssStatus.Callback
+        int satellites = 0;
+        int satellitesInFix = 0;
+        if (getContext() != null){
+            if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            int timetofix = mLocationManager.getGpsStatus(null).getTimeToFirstFix();
+            for (GpsSatellite sat : mLocationManager.getGpsStatus(null).getSatellites()) {
+                if (sat.usedInFix()) {
+                    satellitesInFix++;
+                }
+                satellites++;
+            }
+            mSatellites = satellites;
+            mSatellitesInFix = satellitesInFix;
+
+            if (mSatellites > 0) {
+                if (mSatellitesInFix < 5) {
+                    gpsMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.gps_status_none, null));
+                } else if (mSatellitesInFix < 9) {
+                    gpsMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.gps_status_part, null));
+                } else {
+                    gpsMenuItem.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.gps_status_full, null));
+                }
+            }
+        }
+    }
+
     //endregion
 
     public interface CallBack {
-        public void requestPhoto();
+        void requestPhoto();
     }
 
     public void receivePhoto(Bitmap inPhoto) {
         if (inPhoto != null) {
-            Log.d(LOG_TAG,"got photo");
+            Log.d(LOG_TAG, "got photo");
         } else {
-            Log.d(LOG_TAG,"got null photo");
+            Log.d(LOG_TAG, "got null photo");
         }
         if ((mRequestingPhotoForCourse) && (mCurrentCourse != null)) {
             mCurrentCourse.courseImage = inPhoto;
@@ -261,12 +320,13 @@ public class CourseCreateFragment extends Fragment
         mapView.onSaveInstanceState(mapViewSaveState);
         outState.putBundle("mapViewSaveState", mapViewSaveState);
 
-        outState.putParcelable(LAST_SAVED_LOCATION_KEY,mLastSavedLocation);
-        outState.putInt(LOCATION_COUNT_KEY,mLocationCount);
-        outState.putFloat(LOCATION_DISTANCE_KEY,mLocationDistance);
-        outState.putParcelable(CURRENT_COURSE_KEY,mCurrentCourse);
-        outState.putBoolean(COURSE_RECORDING_KEY,courseRecording);
-        outState.putBoolean(COURSE_COMPLETED_KEY,courseCompleted);
+        outState.putParcelable(LAST_SAVED_LOCATION_KEY, mLastSavedLocation);
+        outState.putInt(LOCATION_COUNT_KEY, mLocationCount);
+        outState.putFloat(LOCATION_DISTANCE_KEY, mLocationDistance);
+        outState.putParcelable(CURRENT_COURSE_KEY, mCurrentCourse);
+        outState.putBoolean(COURSE_RECORDING_KEY, courseRecording);
+        outState.putBoolean(COURSE_PAUSED_KEY,courseRecordingPaused);
+        outState.putBoolean(COURSE_COMPLETED_KEY, courseCompleted);
 
         super.onSaveInstanceState(outState);
     }
@@ -291,14 +351,26 @@ public class CourseCreateFragment extends Fragment
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        mLocationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mLocationManager.addGpsStatusListener(this);
 
-        mLocationManager = (LocationManager) getContext().getSystemService( Context.LOCATION_SERVICE );
         if (savedInstanceState != null) {
             mLastSavedLocation = savedInstanceState.getParcelable(LAST_SAVED_LOCATION_KEY);
             mLocationCount = savedInstanceState.getInt(LOCATION_COUNT_KEY,0);
             mLocationDistance = savedInstanceState.getFloat(LOCATION_DISTANCE_KEY,0);
             mCurrentCourse = savedInstanceState.getParcelable(CURRENT_COURSE_KEY);
             courseRecording = savedInstanceState.getBoolean(COURSE_RECORDING_KEY);
+            courseRecordingPaused = savedInstanceState.getBoolean(COURSE_PAUSED_KEY);
             courseCompleted = savedInstanceState.getBoolean(COURSE_COMPLETED_KEY);
             courseItems = new ArrayList<CourseKeyPointData>();
         } else {
@@ -308,17 +380,59 @@ public class CourseCreateFragment extends Fragment
             mCurrentCourse = new CourseData();
             courseItems = new ArrayList<CourseKeyPointData>();
             courseRecording = false;
+            courseRecordingPaused = false;
             courseCompleted = false;
+        }
+    }
+
+    private void setMapTypePreference(String inPref) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PrefKeys.COURSES_SHARED_PREFERENCE_MAPTYPE_KEY, inPref);
+        editor.apply();
+        updateMapType(inPref);
+    }
+
+    private void updateMapType(String inPref) {
+        switch (inPref) {
+            case PrefKeys.MAPTYPE_NORMAL:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+
+            case PrefKeys.MAPTYPE_SATELLITE:
+                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+
+            case PrefKeys.MAPTYPE_HYBRID:
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+
+            case PrefKeys.MAPTYPE_TERRAIN:
+                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home: {
-                getActivity().onBackPressed();
+
+            case R.id.menu_map_item_normal:
+                setMapTypePreference(PrefKeys.MAPTYPE_NORMAL);
                 return true;
-            }
+
+            case R.id.menu_map_item_satellite:
+                setMapTypePreference(PrefKeys.MAPTYPE_SATELLITE);
+                return true;
+
+            case R.id.menu_map_item_hybrid:
+                setMapTypePreference(PrefKeys.MAPTYPE_HYBRID);
+                return true;
+
+            case R.id.menu_map_item_terrain:
+                setMapTypePreference(PrefKeys.MAPTYPE_TERRAIN);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -340,7 +454,7 @@ public class CourseCreateFragment extends Fragment
         if (mCurrentCourse != null) {
             updateCourseDisplay();
         }
-        setHasOptionsMenu(false);
+        setHasOptionsMenu(true);
         return rootView;
     }
 
@@ -394,7 +508,7 @@ public class CourseCreateFragment extends Fragment
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); //Best Available
         mLocationRequest.setInterval(GPS_UPDATE_PERIOD);
 
-        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -410,7 +524,6 @@ public class CourseCreateFragment extends Fragment
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(LOG_TAG,"Google API Connection suspended");
-
     }
 
     @Override
@@ -419,41 +532,51 @@ public class CourseCreateFragment extends Fragment
     }
 
     private void updateCourseDisplay() {
-        updateCourseSpecs(mCurrentCourse);
-        courseNameEdit.setText(mCurrentCourse.courseName);
-        courseDescriptionEdit.setText(mCurrentCourse.courseDescription);
-        courseImageView.setImageBitmap(mCurrentCourse.courseImage);
+        if (mCurrentCourse != null) {
+            updateCourseSpecs(mCurrentCourse);
+            courseNameEdit.setText(mCurrentCourse.courseName);
+            courseDescriptionEdit.setText(mCurrentCourse.courseDescription);
+            courseImageView.setImageBitmap(mCurrentCourse.courseImage);
 
-        if (courseRecording || courseCompleted) {
-            //show course info labels
-            String accuracyString = (mLastLocation != null)?(" (acc:" + mLastLocation.getAccuracy()+"m)"):("");
-            courseInfoDistance.setText(mCurrentCourse.courseDistance+"m"+accuracyString);
-            courseInfoObstacles.setText(mCurrentCourse.courseKeyPointCount+" obstacles ("+mCurrentCourse.courseFlaggedCount+" flagged)");
-        }
+            if (courseRecording || courseCompleted) {
+                //show course info labels
+                String accuracyString = (mLastLocation != null) ? (" (acc:" + mLastLocation.getAccuracy() + "m)") : ("");
+                courseInfoDistance.setText(mCurrentCourse.courseDistance + "m" + accuracyString);
+                courseInfoObstacles.setText(mCurrentCourse.courseKeyPointCount + " obstacles (" + mCurrentCourse.courseFlaggedCount + " flagged)");
+            }
 
-        if (mEditingPoint != null) {
-            String tText = mEditingPoint.keyFlaggedDistance+"m";
-            if (mEditingPoint.keyFlagged)
-                tText = tText + ", flagged "+mEditingPoint.keyFlaggedNumber;
-            keypointInfoText.setText(tText);
-        }
+            if (mEditingPoint != null) {
+                String tText = mEditingPoint.keyFlaggedDistance + "m";
+                if (mEditingPoint.keyFlagged)
+                    tText = tText + ", flagged " + mEditingPoint.keyFlaggedNumber;
+                keypointInfoText.setText(tText);
+            }
 
-        if (courseRecording) {
-            actionButton.setText(getResources().getString(R.string.course_create_finish_button));
-            addObstacleButton.setVisibility(View.VISIBLE);
-            cancelCourseButton.setVisibility(View.GONE);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        } else {
-            if (courseCompleted) {
-                actionButton.setText(getResources().getString(R.string.course_create_save_button));
-                addObstacleButton.setVisibility(View.GONE);
-                cancelCourseButton.setVisibility(View.VISIBLE);
-                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            } else {
-                actionButton.setText(getResources().getString(R.string.course_create_start_button));
-                addObstacleButton.setVisibility(View.GONE);
+            if (courseRecording) {
+                actionButton.setText(getResources().getString(R.string.course_create_finish_button));
+                addObstacleButton.setVisibility(View.VISIBLE);
                 cancelCourseButton.setVisibility(View.GONE);
-                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                pauseCourseButton.setVisibility(View.VISIBLE);
+                recordingPausedIndicator.setVisibility((courseRecordingPaused)?View.VISIBLE:View.GONE);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                actionButton.setEnabled(!courseRecordingPaused);
+                addObstacleButton.setEnabled(!courseRecordingPaused);
+            } else {
+                if (courseCompleted) {
+                    actionButton.setText(getResources().getString(R.string.course_create_save_button));
+                    addObstacleButton.setVisibility(View.GONE);
+                    cancelCourseButton.setVisibility(View.VISIBLE);
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                } else {
+                    actionButton.setText(getResources().getString(R.string.course_create_start_button));
+                    addObstacleButton.setVisibility(View.GONE);
+                    cancelCourseButton.setVisibility(View.GONE);
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                }
+                pauseCourseButton.setVisibility(View.GONE);
+                recordingPausedIndicator.setVisibility(View.GONE);
+                actionButton.setEnabled(true);
+                addObstacleButton.setEnabled(true);
             }
         }
     }
@@ -584,6 +707,7 @@ public class CourseCreateFragment extends Fragment
                     actionButton.setText(getResources().getString(R.string.course_create_finish_button));
                     addObstacleButton.setVisibility(View.VISIBLE);
                     cancelCourseButton.setVisibility(View.GONE);
+                    pauseCourseButton.setVisibility(View.VISIBLE);
                     ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                     updateMapPoly();
                 } else {
@@ -605,6 +729,7 @@ public class CourseCreateFragment extends Fragment
                 actionButton.setText(getResources().getString(R.string.course_create_save_button));
                 addObstacleButton.setVisibility(View.INVISIBLE);
                 cancelCourseButton.setVisibility(View.VISIBLE);
+                pauseCourseButton.setVisibility(View.GONE);
 
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -643,6 +768,14 @@ public class CourseCreateFragment extends Fragment
             AlertDialog alert = builder.create();
             alert.show();
         }
+    }
+
+    @OnClick(R.id.course_create_pause_button)
+    public void pauseButtonPressed() {
+        courseRecordingPaused = !courseRecordingPaused;
+        recordingPausedIndicator.setVisibility((courseRecordingPaused)?View.VISIBLE:View.GONE);
+        actionButton.setEnabled(!courseRecordingPaused);
+        addObstacleButton.setEnabled(!courseRecordingPaused);
     }
 
     @OnClick(R.id.add_key_fab)
@@ -934,29 +1067,33 @@ public class CourseCreateFragment extends Fragment
 
     @Override
     public void onLocationChanged(Location location) {
+
         if ((mLastLocation == null) && (mapReady)) {
             LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
             CameraPosition target = CameraPosition.builder().target(loc).zoom(15).build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(target));
         }
         mLastLocation = location;
-        if ((courseRecording) || (courseCompleted)) {
-            courseInfoDistance.setText(mCurrentCourse.courseDistance+"m (acc:" + (int)mLastLocation.getAccuracy()+"m)");
-        } else {
-            courseInfoDistance.setText("GPS accuracy: " + (int)mLastLocation.getAccuracy()+"m");
-        }
-        if (courseRecording) {
-            if ((location.distanceTo(mLastSavedLocation) > GPS_UPDATE_DISTANCE) &&
-                    (location.distanceTo(mLastSavedLocation) > location.getAccuracy())){
-                mLocationDistance += location.distanceTo(mLastSavedLocation);
-                mLocationCount++;
-                mLastSavedLocation = location;
-                updateMapPoly();
-                CourseLocationData tLocation = new CourseLocationData();
-                tLocation.locationLocation = new LatLng(location.getLatitude(),location.getLongitude());
-                tLocation.locationDistance = mLocationDistance;
-                mCurrentCourse.courseLocations.add(tLocation);
-                updateCourseDisplay();
+        if (mCurrentCourse != null) {
+            if ((courseRecording) || (courseCompleted)) {
+                courseInfoDistance.setText(mCurrentCourse.courseDistance + "m (acc:" + (int) mLastLocation.getAccuracy() + "m)");
+            } else {
+                courseInfoDistance.setText("GPS accuracy: " + (int) mLastLocation.getAccuracy() + "m");
+                courseInfoObstacles.setText(mSatellites + " satellites (" + mSatellitesInFix + " in fix)");
+            }
+            if ((courseRecording) && (!courseRecordingPaused)) {
+                if ((location.distanceTo(mLastSavedLocation) > GPS_UPDATE_DISTANCE) &&
+                        (location.distanceTo(mLastSavedLocation) > location.getAccuracy())) {
+                    mLocationDistance += location.distanceTo(mLastSavedLocation);
+                    mLocationCount++;
+                    mLastSavedLocation = location;
+                    updateMapPoly();
+                    CourseLocationData tLocation = new CourseLocationData();
+                    tLocation.locationLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    tLocation.locationDistance = mLocationDistance;
+                    mCurrentCourse.courseLocations.add(tLocation);
+                    updateCourseDisplay();
+                }
             }
         }
 
@@ -974,11 +1111,14 @@ public class CourseCreateFragment extends Fragment
             );
         }
 
-        if (location.getAccuracy() < MINIMUM_GPS) {
-//            locationTextView5.setText("Approved Location");
-        } else {
-//            locationTextView5.setText("Insufficient Location");
-        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.map_menu, menu);
+        gpsMenuItem = menu.findItem(R.id.gps_status_item);
     }
 
     @Override
@@ -993,7 +1133,8 @@ public class CourseCreateFragment extends Fragment
         if (mCurrentCourse != null) {
             updateMapPoly();
         }
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+
+        updateMapType(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(PrefKeys.COURSES_SHARED_PREFERENCE_MAPTYPE_KEY,PrefKeys.MAPTYPE_NORMAL));
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override

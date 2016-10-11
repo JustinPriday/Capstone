@@ -2,9 +2,11 @@ package com.justinpriday.nanodegree.capstone;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -37,6 +42,7 @@ import com.justinpriday.nanodegree.capstone.Loaders.CourseCollectorTask;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
 import com.justinpriday.nanodegree.capstone.Models.CourseKeyPointData;
 import com.justinpriday.nanodegree.capstone.Models.CourseLocationData;
+import com.justinpriday.nanodegree.capstone.Utility.PrefKeys;
 
 import java.util.ArrayList;
 
@@ -48,15 +54,16 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback{
 
     private static final String LOG_TAG = CourseReviewFragment.class.getSimpleName();
+    private static final int ANIMATION_ZOOM_TIME = 800;
     private static final float ANIMATION_STEP_TIME = 1000.0f;
 
 
-    Context mContext = null;
-    CourseData mCurrentCourse = null;
+    private Context mContext = null;
+    private CourseData mCurrentCourse = null;
 
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
-    MapView mapView;
+    private MapView mapView;
     private boolean mapReady = false;
 
     private Polyline coursePoly = null;
@@ -68,20 +75,80 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
     private int mCurrentLocationID;
     private int mCurrentKeyPointID;
     private ArrayList<CourseLocationData> keypointItems = null;
+
+    private void setMapTypePreference(String inPref) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PrefKeys.COURSES_SHARED_PREFERENCE_MAPTYPE_KEY, inPref);
+        editor.apply();
+        updateMapType(inPref);
+    }
+
+    private void updateMapType(String inPref) {
+        switch (inPref) {
+            case PrefKeys.MAPTYPE_NORMAL:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+
+            case PrefKeys.MAPTYPE_SATELLITE:
+                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+
+            case PrefKeys.MAPTYPE_HYBRID:
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+
+            case PrefKeys.MAPTYPE_TERRAIN:
+                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+
+        }
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_map_item_normal:
+                setMapTypePreference(PrefKeys.MAPTYPE_NORMAL);
+                return true;
+
+            case R.id.menu_map_item_satellite:
+                setMapTypePreference(PrefKeys.MAPTYPE_SATELLITE);
+                return true;
+
+            case R.id.menu_map_item_hybrid:
+                setMapTypePreference(PrefKeys.MAPTYPE_HYBRID);
+                return true;
+
+            case R.id.menu_map_item_terrain:
+                setMapTypePreference(PrefKeys.MAPTYPE_TERRAIN);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private boolean animatingPosition = false;
     private double mLastSoD;
     private boolean mAnimatingForward;
 
-    public static final String CURRENT_COURSE_KEY = "current_course";
-    public static final String CURRENT_LOCATION_KEY = "current_location";
-    public static final String CURRENT_LOCATION_ID_KEY = "current_location_id";
-    public static final String CURRENT_KEYPOIN_ID_KEY = "current_keypoint_id";
+    private  static final String CURRENT_COURSE_KEY = "current_course";
+    private  static final String CURRENT_LOCATION_KEY = "current_location";
+    private  static final String CURRENT_LOCATION_ID_KEY = "current_location_id";
+    private  static final String CURRENT_KEYPOIN_ID_KEY = "current_keypoint_id";
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     public CourseReviewFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.map_menu, menu);
     }
 
     @Override
@@ -132,8 +199,7 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
             tBar.setDisplayHomeAsUpEnabled(true);
             tBar.setDisplayShowHomeEnabled(true);
         }
-        setHasOptionsMenu(false);
-
+        setHasOptionsMenu(true);
         return rootView;
     }
 
@@ -297,66 +363,92 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
         }
     }
 
+    private void updateCurrentKeyPoint() {
+        if (mCurrentLocation.keyPointData != null) {
+            Toast.makeText(mContext,"Got New Keypoint "+mCurrentLocation.keyPointData.keyTitle,Toast.LENGTH_SHORT).show();
+        } else if (mCurrentLocationID == 0) {
+            Toast.makeText(mContext,"At The Beginning",Toast.LENGTH_SHORT).show();
+        } else if (mCurrentLocationID == (mCurrentCourse.courseLocations.size() - 1)) {
+            Toast.makeText(mContext,"At The End",Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void animateLocations(final ArrayList<LatLng> locations, final int endLoc) {
         final int stepDelay = (int) (ANIMATION_STEP_TIME / locations.size());
         final Handler handler = new Handler();
 
         handler.post(new Runnable() {
             int countPos = 0;
+            boolean animationFinished = false;
 
             @Override
             public void run() {
-                LatLng drawPos;
-                if (countPos == 0) {
+                LatLng drawPos = null;
+                if (animationFinished) {
+                    updateCurrentKeyPoint();
+                } else if (countPos == 0) {
                     drawPos = locations.get(1);
                     countPos++;
                     locations.toArray(new LatLng[locations.size()]);
-                    moveToPoint(locations.toArray(new LatLng[locations.size()]),500);
-                    handler.postDelayed(this,500);
+                    moveToPoint(locations.toArray(new LatLng[locations.size()]),ANIMATION_ZOOM_TIME);
+                    handler.postDelayed(this,ANIMATION_ZOOM_TIME);
                     animatingPosition = true;
                     Log.d(LOG_TAG,"Drawing Start Position "+drawPos.latitude+", "+drawPos.longitude);
                 } else if (countPos == locations.size()) {
                     drawPos = locations.get(locations.size() - 1);
-                    moveToPoint(new LatLng[]{drawPos},500);
+                    moveToPoint(new LatLng[]{drawPos},ANIMATION_ZOOM_TIME);
                     animatingPosition = false;
                     Log.d(LOG_TAG,"Drawing End Position "+drawPos.latitude+", "+drawPos.longitude);
                     mCurrentLocationID = endLoc;
                     mCurrentLocation = mCurrentCourse.courseLocations.get(endLoc);
                     mCurrentKeyPointID = keypointItems.indexOf(mCurrentLocation);
+                    animationFinished = true;
+                    handler.postDelayed(this,ANIMATION_ZOOM_TIME);
                 } else {
                     drawPos = locations.get(countPos);
                     countPos++;
                     handler.postDelayed(this,stepDelay);
                     Log.d(LOG_TAG,"Drawing Intermediate Position "+drawPos.latitude+", "+drawPos.longitude);
                 }
-                mCurrentPositionMarker.setPosition(drawPos);
+                if (drawPos != null)
+                    mCurrentPositionMarker.setPosition(drawPos);
             }
         });
     }
 
     @OnClick(R.id.review_previous_button)
     public void previousButtonPressed() {
+        if ((mCurrentKeyPointID > 0) && (!animatingPosition)) {
+            ArrayList<LatLng> animateList = new ArrayList<LatLng>();
+            int lastPosition = mCurrentLocationID;
+            do {
+                lastPosition--;
+            } while ((mCurrentCourse.courseLocations.get((lastPosition >-1)?lastPosition:0).keyPointData == null) &&
+                    (lastPosition > -1));
+            if (lastPosition == -1)
+                lastPosition = 0;
+            for (int count = mCurrentLocationID;count >= lastPosition;count--) {
+                animateList.add(mCurrentCourse.courseLocations.get(count).locationLocation);
+            }
+            Log.d(LOG_TAG, "Got " + animateList.size() + " animation items");
+            animateLocations(animateList,(lastPosition));
+        }
     }
 
     @OnClick(R.id.review_next_button)
     public void nextButtonPressed() {
         if ((mCurrentKeyPointID < (keypointItems.size() - 1)) && (!animatingPosition)) {
             ArrayList<LatLng> animateList = new ArrayList<LatLng>();
-
             int lastPosition = mCurrentLocationID;
             do {
-//                animateList.add(mCurrentCourse.courseLocations.get(countID).locationLocation);
                 lastPosition++;
-            } while ((mCurrentCourse.courseLocations.get(lastPosition).keyPointData == null) &&
+            } while ((mCurrentCourse.courseLocations.get((lastPosition < mCurrentCourse.courseLocations.size())?lastPosition:(lastPosition - 1)).keyPointData == null) &&
                     (lastPosition < mCurrentCourse.courseLocations.size()));
-
             if (lastPosition == mCurrentCourse.courseLocations.size())
                 lastPosition = mCurrentCourse.courseLocations.size() - 1;
-
             for (int count = mCurrentLocationID;count <= lastPosition;count++) {
                 animateList.add(mCurrentCourse.courseLocations.get(count).locationLocation);
             }
-
             Log.d(LOG_TAG, "Got " + animateList.size() + " animation items");
             animateLocations(animateList,(lastPosition));
         }
@@ -408,6 +500,7 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
         Log.d(LOG_TAG,"Map Ready");
         mapReady = true;
         mMap = googleMap;
+        updateMapType(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(PrefKeys.COURSES_SHARED_PREFERENCE_MAPTYPE_KEY,PrefKeys.MAPTYPE_NORMAL));
         if (mCurrentCourse != null) {
             updateMapPoly();
             updateCurrentPosition();

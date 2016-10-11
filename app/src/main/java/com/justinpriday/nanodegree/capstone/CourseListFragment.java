@@ -63,7 +63,7 @@ public class CourseListFragment extends Fragment implements LoaderManager.Loader
     @Bind(R.id.no_course_indicator)
     TextView noCourseIndicator;
 
-    Context mContext = null;
+    private Context mContext = null;
 
     private static final int COURSE_LOADER = 0;
 
@@ -194,8 +194,8 @@ public class CourseListFragment extends Fragment implements LoaderManager.Loader
 
 
     public interface CallBack {
-        public void onNewCourseSelected();
-        public void onCourseSelected(long courseID);
+        void onNewCourseSelected();
+        void onCourseSelected(long courseID);
     }
 
     @OnClick(R.id.add_fab)

@@ -8,4 +8,5 @@
     <!--<color name="colorAccent">#FF4081</color>-->
 
     <color name="backgroundColor">#BBBBBB</color>
+    <color name="toolbarTextColor">#FFFFFF</color>
 </resources>

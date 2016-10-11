@@ -16,7 +16,7 @@ public class CourseDBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 2;
 
-    static final String DATABASE_NAME = "courses.db";
+    private static final String DATABASE_NAME = "courses.db";
 
     public CourseDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

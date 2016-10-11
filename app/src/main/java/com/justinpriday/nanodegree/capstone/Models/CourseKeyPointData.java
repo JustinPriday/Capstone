@@ -80,12 +80,13 @@ public class CourseKeyPointData implements Parcelable {
         keyDescription = cursor.getString(cursor.getColumnIndex(CourseContract.KeyPointEntry.COLUMN_KEY_DESCRIPTION));
         keyFlaggedNumber = cursor.getInt(cursor.getColumnIndex(CourseContract.KeyPointEntry.COLUMN_KEY_FLAGGED));
         keyFlagged = (keyFlaggedNumber > -1);
-
-        byte[] byteArray = cursor.getBlob(cursor.getColumnIndex(CourseContract.KeyPointEntry.COLUMN_KEY_PHOTO));
-        if (byteArray != null) {
-            keyPhoto = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        } else {
-            keyPhoto = null;
+        if (cursor.getColumnIndex(CourseContract.KeyPointEntry.COLUMN_KEY_PHOTO) > -1) {
+            byte[] byteArray = cursor.getBlob(cursor.getColumnIndex(CourseContract.KeyPointEntry.COLUMN_KEY_PHOTO));
+            if (byteArray != null) {
+                keyPhoto = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            } else {
+                keyPhoto = null;
+            }
         }
     }
 

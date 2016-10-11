@@ -3,14 +3,44 @@
 
     <string name="course_list_no_courses">No Courses.</string>
 
+    <string name="course_list_item_image_contentdescription"></string>
+
+    <string name="course_create_take_photo_tag">Take Photo</string>
+    <string name="course_create_name_hint">Enter Course Name</string>
+    <string name="course_create_image_contentdescription">Course Image</string>
+    <string name="course_create_description_hint">Enter Course Description</string>
+    <string name="course_create_flagged_checkbox_text">Flagged</string>
+    <string name="course_create_keypoint_title_hint">Title</string>
+    <string name="course_create_keypoint_image_contentdescription">Image of the Key Point</string>
+    <string name="course_create_keypoint_description_hint">Enter Description</string>
+    <string name="course_create_keypoint_done_button_text">Done</string>
+    <string name="course_create_optimum_time_done_button">Done</string>
+    <string name="course_create_optimum_time_button_contentdescription">Set the Optimum Time</string>
+    <string name="course_create_paused_indicator">Paused</string>
     <string name="course_create_start_button">Start Recording</string>
     <string name="course_create_finish_button">Finish Recording</string>
     <string name="course_create_save_button">Save Course</string>
     <string name="course_create_cancel_button">Cancel Course</string>
 
-
-
+    <string name="course_overview_course_image_contentdescription">Course Image</string>
+    <string name="course_overview_delete_button_contentdescription">Delete the Course </string>
+    <string name="course_overview_review_button">Review Course</string>
+    <string name="course_overview_compete_button">Compete</string>
 
     <string name="course_review_previous_button">&lt;&lt;</string>
     <string name="course_review_next_button">&gt;&gt;</string>
+
+
+    <string name="course_widget_header_text">Equestri-X</string>
+    <string name="course_widget_icon_content_description">Icon to launch application.</string>
+    <string name="course_widget_image">Course Image</string>
+    <string name="course_widget_review_button">Review</string>
+    <string name="course_widget_compete_button">Compete</string>
+
+    <string name="map_menu_title">Map Type</string>
+    <string name="map_menu_type_normal">Normal</string>
+    <string name="map_menu_type_satellite">Satellite</string>
+    <string name="map_menu_type_hybrid">Hybrid</string>
+    <string name="map_menu_type_terrain">Terrain</string>
+
 </resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item app:showAsAction="always"
+        android:icon="@drawable/gps_status_off"
+        android:id="@+id/gps_status_item"
+        android:title="GPS Status"
+        android:enabled="false"/>
+</menu>
