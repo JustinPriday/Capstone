@@ -6,8 +6,8 @@ import android.content.pm.PackageManager;
 import android.location.GpsSatellite;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -36,11 +36,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.justinpriday.nanodegree.capstone.Loaders.CourseCollectorTask;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
-import com.justinpriday.nanodegree.capstone.Models.CourseKeyPointData;
 import com.justinpriday.nanodegree.capstone.Models.CourseLocationData;
-
-import java.util.ArrayList;
-import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -64,6 +60,7 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
     private LocationManager mLocationManager;
 
     private boolean mCourseRunning = false;
+    private boolean mCourseFinished = false;
     private Thread updateUIThread;
 
 
@@ -205,7 +202,6 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         }
         setHasOptionsMenu(true);
 
-
         return rootView;
     }
 
@@ -237,11 +233,6 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         super.onStop();
     }
 
-    @OnClick(R.id.compete_countdown_time_button)
-    public void setCountdownPressed() {
-
-    }
-
     @OnClick(R.id.compete_start_button)
     public void startPressed() {
 
@@ -254,11 +245,6 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         mLastFollowingDistance = mLastLocation.distanceTo(mFollowingCoursePosition);
         mStartTime = System.currentTimeMillis();
         startUIUpdate();
-    }
-
-    @OnClick(R.id.compete_countdown_button)
-    public void startCountdownPressed() {
-
     }
 
     private void updateNextKeypoint() {
@@ -330,12 +316,9 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
     }
 
     private void setPreStartSpecs() {
-//        keyTitleText.setText(mContext.getResources().getString(R.string.course_compete_start_string));
-
         remainTimeText.setText(timeStringFromSeconds(mCurrentCourse.courseIdealTime));
         distanceRemText.setText(String.format("%05dm",mCurrentCourse.courseDistance));
         reqAveText.setText(String.format("%d",getSpeedFromDT(mCurrentCourse.courseDistance,mCurrentCourse.courseIdealTime)));
-
     }
 
     private void updateOutput() {
@@ -439,14 +422,6 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.d(LOG_TAG,"Got New Location "+location.getLatitude()+","+
-                location.getLongitude()+" accurate to "+location.getAccuracy()+"m");
-
-
-//        private Date lastUpdate = null;
-//        private double updateTotal;
-//        private int updateCount;
-
         if (lastUpdate == 0) {
             lastUpdate = System.currentTimeMillis();
             updateTotal = 0;
@@ -487,15 +462,19 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
                 } else {
                     //Moving towards finish
                     if (mNextCoursePosition.distanceTo(location) < FINISH_THRESHOLD) {
-                        Toast.makeText(getContext(),"Finish Found",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(),"Course Finished",Toast.LENGTH_SHORT).show();
+                        if (updateUIThread != null) {
+                            updateUIThread.interrupt();
+                        }
+                        mCourseFinished = true;
+                        mCourseRunning = false;
                     }
                 }
-            } else {
+            } else if (!mCourseFinished) {
                 if (mStartCoursePosition == null) {
                     mStartCoursePosition = getLocationfromLatLng(mCurrentCourse.courseLocations.get(0).locationLocation);
                 }
-                startButton.setEnabled(true);
-//                startButton.setEnabled(location.distanceTo(mStartCoursePosition) < START_THRESHOLD);
+                startButton.setEnabled(location.distanceTo(mStartCoursePosition) < START_THRESHOLD);
                 updateOutput();
             }
         }
@@ -517,7 +496,6 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
                 return;
             }
             int timetofix = mLocationManager.getGpsStatus(null).getTimeToFirstFix();
-            Log.i(LOG_TAG, "Time to first fix = " + timetofix);
             for (GpsSatellite sat : mLocationManager.getGpsStatus(null).getSatellites()) {
                 if (sat.usedInFix()) {
                     satellitesInFix++;

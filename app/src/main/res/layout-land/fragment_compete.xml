@@ -79,6 +79,7 @@
                             android:src="@drawable/ic_optimum_timer"
                             android:contentDescription="@string/course_compete_countdown_time_contentdescription"
                             android:background="@android:color/transparent"
+                            android:visibility="gone"
                             android:layout_gravity="bottom|right"/>
 
                     </FrameLayout>
@@ -107,6 +108,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:visibility="gone"
                     android:text="@string/course_compete_countdown_button"/>
 
             </LinearLayout>
