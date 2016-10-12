@@ -28,10 +28,9 @@
     <string name="course_overview_review_button">Review Course</string>
     <string name="course_overview_compete_button">Compete</string>
 
+    <string name="course_review_default_keypoint_title">Start</string>
     <string name="course_review_previous_button">&lt;&lt;</string>
     <string name="course_review_next_button">&gt;&gt;</string>
-
-
 
     <string name="course_compete_elapsed_time_label">Elapsed Time</string>
     <string name="course_compete_optimum_time_label">Optimum Time</string>

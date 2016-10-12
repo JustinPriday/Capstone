@@ -22,7 +22,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:layout_margin="5dp">
+                android:layout_margin="@dimen/create_photo_layout_margin">
                 <ImageView
                     android:id="@+id/course_image_view"
                     android:layout_width="match_parent"
@@ -42,9 +42,9 @@
                     android:text="@string/course_create_take_photo_tag"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginBottom="@dimen/create_photo_text_indicator_margin_bottom"
                     android:textColor="#999999"
-                    android:textSize="10sp"
+                    android:textSize="@dimen/create_photo_text_indicator_size"
                     android:gravity="center_horizontal|bottom"/>
 
             </RelativeLayout>
@@ -62,7 +62,7 @@
                     android:maxLines="1"
                     android:imeOptions="actionDone"
                     android:inputType="textCapSentences"
-                    android:layout_margin="4dp"
+                    android:layout_margin="@dimen/create_course_name_edit_margin_bottom"
                     android:hint="@string/course_create_name_hint"
                     android:textColorHint="#DDDDDD"/>
                 <LinearLayout
@@ -96,8 +96,8 @@
 
                         <ImageButton
                             android:id="@+id/optimum_time_button"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="@dimen/optimum_time_icon_width"
+                            android:layout_height="@dimen/course_main_icon_height"
                             android:src="@drawable/ic_optimum_timer"
                             android:contentDescription="@string/course_create_optimum_time_button_contentdescription"
                             android:background="@android:color/transparent"/>
@@ -109,10 +109,10 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/create_course_description_divider_height"
             android:background="@color/colorAccent"
-            android:layout_marginRight="5dp"
-            android:layout_marginLeft="5dp"/>
+            android:layout_marginRight="@dimen/create_course_description_divider_marginsize"
+            android:layout_marginLeft="@dimen/create_course_description_divider_marginsize"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -126,13 +126,13 @@
                 android:hint="@string/course_create_description_hint"
                 android:textColorHint="#DDDDDD"
                 android:background="#EEEEEE"
-                android:padding="5dp"
+                android:padding="@dimen/create_course_description_edit_padding"
                 android:gravity="top"
                 android:inputType="textMultiLine"
                 android:maxLines="8"
                 android:imeOptions="actionDone"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"/>
+                android:layout_marginLeft="@dimen/create_course_description_edit_marginside"
+                android:layout_marginRight="@dimen/create_course_description_edit_marginside"/>
         </LinearLayout>
 
         <LinearLayout
@@ -165,7 +165,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:src="@android:drawable/ic_media_pause"
-                android:elevation="2dp"
+                android:elevation="@dimen/create_course_pause_elevation"
                 android:visibility="gone"/>
 
         </LinearLayout>

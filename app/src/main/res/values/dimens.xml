@@ -2,20 +2,38 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="list_backdrop_height">120dp</dimen>
 
+    <dimen name="course_activity_padding">0dp</dimen>
+
+    <dimen name="course_main_expanded_margin_start">72dp</dimen>
+    <dimen name="course_main_expanded_margin_bottom">40dp</dimen>
+    <dimen name="course_main_icon_width">56dp</dimen>
+    <dimen name="course_main_icon_height">56dp</dimen>
+    <dimen name="course_main_icon_margin_start">8dp</dimen>
+
     <dimen name="create_card_margins">10dp</dimen>
     <dimen name="create_card_corner_radius">10dp</dimen>
 
+    <dimen name="create_photo_layout_margin">5dp</dimen>
+    <dimen name="create_photo_text_indicator_margin_bottom">5dp</dimen>
+    <dimen name="create_photo_text_indicator_size">10sp</dimen>
+    <dimen name="create_course_name_edit_margin_bottom">4dp</dimen>
+
+    <dimen name="create_course_description_divider_height">1dp</dimen>
+    <dimen name="create_course_description_divider_marginsize">5dp</dimen>
+
+    <dimen name="create_course_description_edit_padding">5dp</dimen>
+    <dimen name="create_course_description_edit_marginside">5dp</dimen>
+
+    <dimen name="optimum_time_icon_width">36dp</dimen>
+    <dimen name="optimum_time_icon_height">36dp</dimen>
     <dimen name="optimum_time_button_text_size">22sp</dimen>
+
+    <dimen name="create_course_pause_elevation">2dp</dimen>
 
     <dimen name="fab_margin">16dp</dimen>
 
-
-
-
     <dimen name="course_create_paused_indicator_padding">5dp</dimen>
     <dimen name="course_create_paused_indicator_textsize">32sp</dimen>
-
-
 
     <dimen name="course_compete_card_padding">5dp</dimen>
     <dimen name="course_compete_card_cornerradius">10dp</dimen>
@@ -27,10 +45,22 @@
     <dimen name="course_compete_key_title_size">26sp</dimen>
     <dimen name="course_compete_key_distance_size">22sp</dimen>
     <dimen name="course_compete_key_distance_paddingtop">10dp</dimen>
+    <dimen name="course_compete_card_margin">10dp</dimen>
 
     <dimen name="course_ave_speed_size">22sp</dimen>
     <dimen name="course_distances_size">22sp</dimen>
 
+    <dimen name="widget_bar_height">48dp</dimen>
+    <dimen name="widget_bar_text_margin_left">10dp</dimen>
+    <dimen name="widget_bar_text_margin_top">10dp</dimen>
+    <dimen name="widget_bar_text_size">22sp</dimen>
+    <dimen name="widget_icon_width">36dp</dimen>
+    <dimen name="widget_icon_height">36dp</dimen>
+    <dimen name="widget_icon_margin_right">10dp</dimen>
+    <dimen name="widget_content_height">80dp</dimen>
+    <dimen name="widget_text_container_padding_left">10dp</dimen>
+    <dimen name="widget_name_text_size">16sp</dimen>
+    <dimen name="widget_description_text_margin">10dp</dimen>
 
 
 </resources>

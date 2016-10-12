@@ -65,7 +65,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/black"
-                    android:text="Start"
+                    android:text="@string/course_review_default_keypoint_title"
                     android:textSize="22dp"/>
 
                 <TextView
