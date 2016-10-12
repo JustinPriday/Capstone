@@ -21,6 +21,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -75,6 +77,24 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
     private int mCurrentLocationID;
     private int mCurrentKeyPointID;
     private ArrayList<CourseLocationData> keypointItems = null;
+
+    @Bind(R.id.key_image)
+    ImageView keyImage;
+
+    @Bind(R.id.key_title)
+    TextView keyTitle;
+
+    @Bind(R.id.key_distance)
+    TextView keyDistance;
+
+    @Bind(R.id.key_points)
+    TextView keyPoints;
+
+    @Bind(R.id.key_description)
+    TextView keyDescription;
+
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
 
     private void setMapTypePreference(String inPref) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -135,10 +155,7 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
     private  static final String CURRENT_COURSE_KEY = "current_course";
     private  static final String CURRENT_LOCATION_KEY = "current_location";
     private  static final String CURRENT_LOCATION_ID_KEY = "current_location_id";
-    private  static final String CURRENT_KEYPOIN_ID_KEY = "current_keypoint_id";
-
-    @Bind(R.id.toolbar)
-    Toolbar toolbar;
+    private  static final String CURRENT_KEYPOINT_ID_KEY = "current_keypoint_id";
 
     public CourseReviewFragment() {
         // Required empty public constructor
@@ -148,7 +165,7 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
-        inflater.inflate(R.menu.map_menu, menu);
+        inflater.inflate(R.menu.map_menu_no_gps, menu);
     }
 
     @Override
@@ -167,8 +184,9 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
             mCurrentCourse = savedInstanceState.getParcelable(CURRENT_COURSE_KEY);
             mCurrentLocation = savedInstanceState.getParcelable(CURRENT_LOCATION_KEY);
             mCurrentLocationID = savedInstanceState.getInt(CURRENT_LOCATION_ID_KEY);
-            mCurrentKeyPointID = savedInstanceState.getInt(CURRENT_LOCATION_ID_KEY);
+            mCurrentKeyPointID = savedInstanceState.getInt(CURRENT_KEYPOINT_ID_KEY);
             courseItems = new ArrayList<CourseKeyPointData>();
+            gotCurrentCourse();
         } else {
             mCurrentCourse = null;
             courseItems = new ArrayList<CourseKeyPointData>();
@@ -199,6 +217,9 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
             tBar.setDisplayHomeAsUpEnabled(true);
             tBar.setDisplayShowHomeEnabled(true);
         }
+        if (mCurrentLocation != null)
+            if (mCurrentLocation.keyPointData != null)
+                updateCurrentKeyPoint();
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -222,7 +243,7 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
         outState.putParcelable(CURRENT_COURSE_KEY,mCurrentCourse);
         outState.putParcelable(CURRENT_LOCATION_KEY,mCurrentLocation);
         outState.putInt(CURRENT_LOCATION_ID_KEY,mCurrentLocationID);
-        outState.putInt(CURRENT_KEYPOIN_ID_KEY,mCurrentKeyPointID);
+        outState.putInt(CURRENT_KEYPOINT_ID_KEY,mCurrentKeyPointID);
 
         super.onSaveInstanceState(outState);
     }
@@ -363,13 +384,39 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
         }
     }
 
+    private void displayKeyPoint(CourseLocationData keypoint) {
+        if (keypoint != null) {
+            keyImage.setImageBitmap(keypoint.keyPointData.keyPhoto);
+            keyImage.setVisibility(View.VISIBLE);
+            keyTitle.setText(keypoint.keyPointData.keyTitle);
+            float progress = (float)keypoint.locationDistance / (float)mCurrentCourse.courseDistance;
+            int itemTime = (int)(mCurrentCourse.courseIdealTime * progress);
+            int iH = mCurrentCourse.courseIdealTime / 60;
+            int iM = mCurrentCourse.courseIdealTime - (iH * 60);
+            int kH = itemTime / 60;
+            int kM = itemTime - (kH * 60);
+            keyDistance.setText((int)keypoint.locationDistance+"m of "+mCurrentCourse.courseDistance+"m, "+kH+":"+kM+" / "+iH+":"+iM);
+            String flaggedString = (keypoint.keyPointData.keyFlagged)?", flagged "+keypoint.keyPointData.keyFlaggedNumber+" of "+mCurrentCourse.courseFlaggedCount:"";
+            keyPoints.setText("Point "+keypoint.keyPointData.keyNumber+" of "+mCurrentCourse.courseKeyPointCount+flaggedString);
+            keyDescription.setText(keypoint.keyPointData.keyDescription);
+        } else {
+            keyImage.setVisibility(View.INVISIBLE);
+            keyTitle.setText("");
+            keyDistance.setText("");
+            keyPoints.setText("");
+            keyDescription.setText("");
+        }
+    }
+
     private void updateCurrentKeyPoint() {
         if (mCurrentLocation.keyPointData != null) {
-            Toast.makeText(mContext,"Got New Keypoint "+mCurrentLocation.keyPointData.keyTitle,Toast.LENGTH_SHORT).show();
+            displayKeyPoint(mCurrentLocation);
         } else if (mCurrentLocationID == 0) {
-            Toast.makeText(mContext,"At The Beginning",Toast.LENGTH_SHORT).show();
+            displayKeyPoint(null);
+            keyTitle.setText("Start");
         } else if (mCurrentLocationID == (mCurrentCourse.courseLocations.size() - 1)) {
-            Toast.makeText(mContext,"At The End",Toast.LENGTH_SHORT).show();
+            displayKeyPoint(null);
+            keyTitle.setText("Finish");
         }
     }
 
@@ -385,16 +432,20 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
             public void run() {
                 LatLng drawPos = null;
                 if (animationFinished) {
+                    //Got to the end
                     updateCurrentKeyPoint();
                 } else if (countPos == 0) {
+                    //Slide out animation
                     drawPos = locations.get(1);
                     countPos++;
                     locations.toArray(new LatLng[locations.size()]);
                     moveToPoint(locations.toArray(new LatLng[locations.size()]),ANIMATION_ZOOM_TIME);
                     handler.postDelayed(this,ANIMATION_ZOOM_TIME);
                     animatingPosition = true;
+                    displayKeyPoint(null);
                     Log.d(LOG_TAG,"Drawing Start Position "+drawPos.latitude+", "+drawPos.longitude);
                 } else if (countPos == locations.size()) {
+                    //Slide in animation
                     drawPos = locations.get(locations.size() - 1);
                     moveToPoint(new LatLng[]{drawPos},ANIMATION_ZOOM_TIME);
                     animatingPosition = false;
@@ -403,8 +454,9 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
                     mCurrentLocation = mCurrentCourse.courseLocations.get(endLoc);
                     mCurrentKeyPointID = keypointItems.indexOf(mCurrentLocation);
                     animationFinished = true;
-                    handler.postDelayed(this,ANIMATION_ZOOM_TIME);
+                    handler.postDelayed(this,ANIMATION_ZOOM_TIME+200);
                 } else {
+                    //move between intermediate positions
                     drawPos = locations.get(countPos);
                     countPos++;
                     handler.postDelayed(this,stepDelay);
@@ -500,7 +552,9 @@ public class CourseReviewFragment extends Fragment implements CourseCollectorTas
         Log.d(LOG_TAG,"Map Ready");
         mapReady = true;
         mMap = googleMap;
-        updateMapType(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(PrefKeys.COURSES_SHARED_PREFERENCE_MAPTYPE_KEY,PrefKeys.MAPTYPE_NORMAL));
+        if (getActivity() != null) {
+            updateMapType(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(PrefKeys.COURSES_SHARED_PREFERENCE_MAPTYPE_KEY, PrefKeys.MAPTYPE_NORMAL));
+        }
         if (mCurrentCourse != null) {
             updateMapPoly();
             updateCurrentPosition();

@@ -36,8 +36,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.justinpriday.nanodegree.capstone.Loaders.CourseCollectorTask;
 import com.justinpriday.nanodegree.capstone.Models.CourseData;
+import com.justinpriday.nanodegree.capstone.Models.CourseKeyPointData;
 import com.justinpriday.nanodegree.capstone.Models.CourseLocationData;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.Bind;
@@ -74,9 +76,10 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
     private Location mLastLocation = null;
     private float mLastNextDistance = 0;
     private float mLastFollowingDistance;
-    private float mStartTime;
+    private long mStartTime;
     private float mLastTime;
     private float mcurrentProgress;
+    private CourseLocationData nextKeyPoint;
 
     private long lastUpdate = 0;
     private long updateTotal;
@@ -90,20 +93,35 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.compete_text_1)
-    TextView competeText1;
+    @Bind(R.id.compete_elapsed_time_text)
+    TextView elapsedTimeText;
 
-    @Bind(R.id.compete_text_2)
-    TextView competeText2;
+    @Bind(R.id.compete_optimum_time_text)
+    TextView optimumTimeText;
 
-    @Bind(R.id.compete_text_3)
-    TextView competeText3;
+    @Bind(R.id.compete_remain_time_text)
+    TextView remainTimeText;
 
-    @Bind(R.id.compete_text_4)
-    TextView competeText4;
+    @Bind(R.id.compete_speed_text)
+    TextView speedText;
 
-    @Bind(R.id.compete_text_5)
-    TextView competeText5;
+    @Bind(R.id.compete_ave_text)
+    TextView aveText;
+
+    @Bind(R.id.compete_req_ave_text)
+    TextView reqAveText;
+
+    @Bind(R.id.compete_distance_text)
+    TextView distanceText;
+
+    @Bind(R.id.compete_distance_remain_text)
+    TextView distanceRemText;
+
+    @Bind(R.id.compete_key_title)
+    TextView keyTitleText;
+
+    @Bind(R.id.compete_key_distance)
+    TextView keyDistanceText;
 
     @Bind(R.id.compete_start_button)
     Button startButton;
@@ -181,6 +199,10 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
             tBar.setDisplayHomeAsUpEnabled(true);
             tBar.setDisplayShowHomeEnabled(true);
         }
+
+        if ((!mCourseRunning) && (getContext() != null)) {
+            keyTitleText.setText(getContext().getResources().getString(R.string.course_compete_start_string));
+        }
         setHasOptionsMenu(true);
 
 
@@ -215,6 +237,11 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         super.onStop();
     }
 
+    @OnClick(R.id.compete_countdown_time_button)
+    public void setCountdownPressed() {
+
+    }
+
     @OnClick(R.id.compete_start_button)
     public void startPressed() {
 
@@ -225,7 +252,23 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         mFollowingCoursePosition = getLocationfromLatLng(mCurrentCourse.courseLocations.get(mCurrentCoursePositionID + 1).locationLocation);
         mLastNextDistance = mLastLocation.distanceTo(mNextCoursePosition);
         mLastFollowingDistance = mLastLocation.distanceTo(mFollowingCoursePosition);
+        mStartTime = System.currentTimeMillis();
         startUIUpdate();
+    }
+
+    @OnClick(R.id.compete_countdown_button)
+    public void startCountdownPressed() {
+
+    }
+
+    private void updateNextKeypoint() {
+        nextKeyPoint = null;
+        for (int count = mCurrentCoursePositionID;count < mCurrentCourse.courseLocations.size();count++) {
+            if (mCurrentCourse.courseLocations.get(count).keyPointData != null) {
+                nextKeyPoint = mCurrentCourse.courseLocations.get(count);
+                break;
+            }
+        }
     }
 
     private void startUIUpdate() {
@@ -261,6 +304,13 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         }
     }
 
+    private String timeStringFromSeconds(int inSecs) {
+        boolean elapsed = (inSecs < 0);
+        int mins = (int)(Math.abs(inSecs) / 60);
+        int secs = (int)(Math.abs(inSecs) - (mins * 60));
+        return String.format(((elapsed)?"-%02d:%02d":"%02d:%02d"),mins,secs);
+    }
+
     private int calculateDistance() {
         CourseLocationData previousCourseLocation = mCurrentCourse.courseLocations.get(mCurrentCoursePositionID - 1);
         double startDistance = mCurrentCourse.courseLocations.get(mCurrentCoursePositionID - 1).locationDistance;
@@ -272,32 +322,72 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
         return (int)(startDistance + (diffDistance / (diffPrevious + diffNext) * diffPrevious));
     }
 
+    private int getSpeedFromDT(int distance,int time) {
+        float speed = 0;
+        if (time > 0)
+            speed = (float)distance / (float)time; //in M/S
+        return (int)(speed * 60); //M/Min
+    }
+
+    private void setPreStartSpecs() {
+//        keyTitleText.setText(mContext.getResources().getString(R.string.course_compete_start_string));
+
+        remainTimeText.setText(timeStringFromSeconds(mCurrentCourse.courseIdealTime));
+        distanceRemText.setText(String.format("%05dm",mCurrentCourse.courseDistance));
+        reqAveText.setText(String.format("%d",getSpeedFromDT(mCurrentCourse.courseDistance,mCurrentCourse.courseIdealTime)));
+
+    }
+
     private void updateOutput() {
         if (mCourseRunning) {
             int currentDistance = calculateDistance();
             if (mCurrentCourse.courseDistance > 0) {
-                mcurrentProgress = (float) currentDistance / (float)mCurrentCourse.courseDistance;
-                competeText1.setText("Current Distance " + currentDistance + " (" + (int) (mcurrentProgress * 100) + ")");
+                mcurrentProgress = (float) currentDistance / (float) mCurrentCourse.courseDistance;
+                int speed = (int)(mLastLocation.getSpeed() * 60);
+                int elapsedTime = (int)((System.currentTimeMillis() - mStartTime) / 1000);
+                int idealTime = (int)(((float)mCurrentCourse.courseIdealTime) * mcurrentProgress);
+                int remainingTime = mCurrentCourse.courseIdealTime - elapsedTime;
+
+                int remainingDistance = mCurrentCourse.courseDistance - currentDistance;
+                int aveSpeed = getSpeedFromDT(currentDistance,elapsedTime);
+                int aveReq = getSpeedFromDT(remainingDistance,remainingTime);
+
+                speedText.setText(String.format("%d",speed));
+                elapsedTimeText.setText(timeStringFromSeconds(elapsedTime));
+                optimumTimeText.setText(timeStringFromSeconds(idealTime));
+                remainTimeText.setText(timeStringFromSeconds(remainingTime));
+                aveText.setText(String.format("%02d",aveSpeed));
+                reqAveText.setText(String.format("%02d",aveReq));
+                distanceText.setText(String.format("%05dm",currentDistance));
+                distanceRemText.setText(String.format("%05dm",remainingDistance));
+                if (nextKeyPoint != null) {
+                    int kpDistance = (int)(nextKeyPoint.locationDistance - (double)currentDistance);
+                    keyTitleText.setText(nextKeyPoint.keyPointData.keyTitle);
+                    keyDistanceText.setText(String.format("%05dm", kpDistance));
+                } else {
+                    keyTitleText.setText(mContext.getResources().getString(R.string.course_compete_finish_string));
+                    keyDistanceText.setText(String.format("%05dm", remainingDistance));
+                }
             }
-            competeText2.setText("Moving towards "+mCurrentCoursePositionID);
         } else {
             if ((mLastLocation != null) && (mStartCoursePosition != null)) {
-                competeText1.setText("Distance to start " + mLastLocation.distanceTo(mStartCoursePosition));
+                keyDistanceText.setText(String.format("%dm",((long)mLastLocation.distanceTo(mStartCoursePosition))));
+                Integer speed = (int)(mLastLocation.getSpeed() / 60);
+                speedText.setText(speed.toString());
             }
         }
         if (mLastLocation != null) {
-            competeText3.setText("Accuracy "+mLastLocation.getAccuracy()+"m");
         }
-
-        competeText4.setText(mSatellites+" satellites ("+mSatellitesInFix+" in fix)");
-
-        competeText5.setText("Average Update Time = "+(int)((float)updateTotal / (float)updateCount));
     }
 
     @Override
     public void CourseCollectorGotCourse(CourseData courseData) {
         Log.d(LOG_TAG,"Course Collected");
         mCurrentCourse = courseData;
+        setPreStartSpecs();
+
+        mCurrentCoursePositionID = 0;
+        updateNextKeypoint();
     }
 
     @Override
@@ -389,6 +479,7 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
                         } else {
                             mFollowingCoursePosition = null; //moving towards finish
                         }
+                        updateNextKeypoint();
                     } else {
                         mLastNextDistance = nextDistance;
                         mLastFollowingDistance = followingDistance;
@@ -403,8 +494,8 @@ public class CompeteFragment extends Fragment implements CourseCollectorTask.Cou
                 if (mStartCoursePosition == null) {
                     mStartCoursePosition = getLocationfromLatLng(mCurrentCourse.courseLocations.get(0).locationLocation);
                 }
-//                startButton.setEnabled(true);
-                startButton.setEnabled(location.distanceTo(mStartCoursePosition) < START_THRESHOLD);
+                startButton.setEnabled(true);
+//                startButton.setEnabled(location.distanceTo(mStartCoursePosition) < START_THRESHOLD);
                 updateOutput();
             }
         }

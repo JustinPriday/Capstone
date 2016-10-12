@@ -17,4 +17,20 @@
 
 
 
+    <dimen name="course_compete_card_padding">5dp</dimen>
+    <dimen name="course_compete_card_cornerradius">10dp</dimen>
+    <dimen name="course_compete_label_text_size">12sp</dimen>
+    <dimen name="course_compete_elapsed_time_size">32sp</dimen>
+    <dimen name="course_compete_optimum_time_size">22sp</dimen>
+    <dimen name="course_compete_speed_size">82sp</dimen>
+    <dimen name="course_compete_key_header_size">22sp</dimen>
+    <dimen name="course_compete_key_title_size">26sp</dimen>
+    <dimen name="course_compete_key_distance_size">22sp</dimen>
+    <dimen name="course_compete_key_distance_paddingtop">10dp</dimen>
+
+    <dimen name="course_ave_speed_size">22sp</dimen>
+    <dimen name="course_distances_size">22sp</dimen>
+
+
+
 </resources>

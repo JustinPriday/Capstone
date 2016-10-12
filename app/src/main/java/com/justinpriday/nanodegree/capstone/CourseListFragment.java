@@ -2,6 +2,7 @@ package com.justinpriday.nanodegree.capstone;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -42,21 +44,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link CourseListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link CourseListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class CourseListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<CourseData>>
         , CourseListAdapter.CallBack {
 
     private static final String LOG_TAG = CourseListFragment.class.getSimpleName();
 
-    @Bind(R.id.toolbar) Toolbar toolbar;
+//    @Bind(R.id.toolbar) Toolbar toolbar;
 
     @Bind(R.id.recyclerView) RecyclerView courseList;
 
@@ -69,8 +62,6 @@ public class CourseListFragment extends Fragment implements LoaderManager.Loader
 
     private ArrayList<CourseData> mCourseList = null;
     private CourseListAdapter mCourseListAdaptor;
-
-    private OnFragmentInteractionListener mListener;
 
     public CourseListFragment() {
         // Required empty public constructor
@@ -97,11 +88,13 @@ public class CourseListFragment extends Fragment implements LoaderManager.Loader
         }
     }
 
+    public void refreshCourseList() {
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
     }
 
     @Override
@@ -117,38 +110,38 @@ public class CourseListFragment extends Fragment implements LoaderManager.Loader
 
         ButterKnife.bind(this, rootView);
 
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ActionBar tBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (tBar != null) {
-            tBar.setDisplayHomeAsUpEnabled(false);
-            tBar.setDisplayShowHomeEnabled(false);
-        }
+//        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+//        ActionBar tBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+//        if (tBar != null) {
+//            tBar.setDisplayHomeAsUpEnabled(false);
+//            tBar.setDisplayShowHomeEnabled(false);
+//        }
+
         setHasOptionsMenu(false);
 
         gotNewCourses(new ArrayList<CourseData>());
-        courseList.setLayoutManager(new LinearLayoutManager(mContext));
-        return rootView;
-    }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+        int tH = getActivity().getResources().getConfiguration().screenHeightDp;
+        int tW = getActivity().getResources().getConfiguration().screenWidthDp;
+        int smallerDim = (tH < tW)?tH:tW;
+        boolean isTab = (smallerDim >= 600);
+        boolean isPort = getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        if(isPort && isTab){
+            courseList.setLayoutManager(new GridLayoutManager(mContext, 2));
+        } else {
+            courseList.setLayoutManager(new LinearLayoutManager(mContext));
         }
+
+        return rootView;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         mContext = context;
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
-    //Loader Overridesm
+    //Loader Overrides
 
     @Override
     public Loader<List<CourseData>> onCreateLoader(int id, Bundle args) {
@@ -198,18 +191,13 @@ public class CourseListFragment extends Fragment implements LoaderManager.Loader
         void onCourseSelected(long courseID);
     }
 
-    @OnClick(R.id.add_fab)
-    public void addFabClicked() {
-        ((CallBack) getActivity()).onNewCourseSelected();
-    }
+//    @OnClick(R.id.add_fab)
+//    public void addFabClicked() {
+//        ((CallBack) getActivity()).onNewCourseSelected();
+//    }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

@@ -50,8 +50,10 @@ public class CourseContentProvider extends ContentProvider {
 
     private void updateWidget() {
         Context context = getContext();
-        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED).setPackage(context.getPackageName());
-        context.sendBroadcast(dataUpdatedIntent);
+        if (context != null) {
+            Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED).setPackage(context.getPackageName());
+            context.sendBroadcast(dataUpdatedIntent);
+        }
     }
 
     @Nullable

@@ -3,7 +3,8 @@
 
     <string name="course_list_no_courses">No Courses.</string>
 
-    <string name="course_list_item_image_contentdescription"></string>
+    <string name="course_list_item_image_contentdescription">null</string>
+    <string name="course_tablet_course_not_selected_string">Select a Course</string>
 
     <string name="course_create_take_photo_tag">Take Photo</string>
     <string name="course_create_name_hint">Enter Course Name</string>
@@ -30,6 +31,31 @@
     <string name="course_review_previous_button">&lt;&lt;</string>
     <string name="course_review_next_button">&gt;&gt;</string>
 
+
+
+    <string name="course_compete_elapsed_time_label">Elapsed Time</string>
+    <string name="course_compete_optimum_time_label">Optimum Time</string>
+    <string name="course_compete_remain_time_label">Remaining Time</string>
+    <string name="course_compete_speed_label">(m/min)</string>
+
+    <string name="course_compete_ave_speed_label">Ave. Speed</string>
+    <string name="course_compete_req_ave_label">Req. Ave</string>
+
+    <string name="course_compete_distance_label">Distance</string>
+    <string name="course_compete_distance_remaining_label">Remaining</string>
+
+    <string name="course_compete_distance_placeholder">00000m</string>
+    <string name="course_compete_speed_placeholder">00</string>
+    <string name="course_compete_time_placeholder">0:00</string>
+
+    <string name="course_compete_key_header">Next Point</string>
+
+    <string name="course_compete_countdown_time_contentdescription">Set the start Countdown Time</string>
+    <string name="course_compete_start_button">Start</string>
+    <string name="course_compete_countdown_button">Countdown</string>
+
+    <string name="course_compete_start_string">Start</string>
+    <string name="course_compete_finish_string">Finish</string>
 
     <string name="course_widget_header_text">Equestri-X</string>
     <string name="course_widget_icon_content_description">Icon to launch application.</string>

@@ -35,8 +35,7 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     private CourseData mCurrentCourse = null;
     private Context mContext = null;
 
-    @Bind(R.id.toolbar)
-    Toolbar toolbar;
+    private boolean mSingleView = true;
 
     @Bind(R.id.overview_course_image)
     ImageView courseImage;
@@ -56,14 +55,13 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     @Bind(R.id.overview_description)
     TextView courseDescription;
 
-    private  static final String CURRENT_COURSE_KEY = "current_course";
-
+    private static final String CURRENT_COURSE_KEY = "current_course";
+    private static final String SINGLE_VIEW_KEY = "single_view";
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-
         outState.putParcelable(CURRENT_COURSE_KEY,mCurrentCourse);
-
+        outState.putBoolean(SINGLE_VIEW_KEY,mSingleView);
         super.onSaveInstanceState(outState);
     }
 
@@ -77,19 +75,27 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
 
         if (savedInstanceState != null){
             mCurrentCourse = savedInstanceState.getParcelable(CURRENT_COURSE_KEY);
+            mSingleView = savedInstanceState.getBoolean(SINGLE_VIEW_KEY);
         } else {
-            if (getActivity().getIntent().getExtras() != null) {
-                long movieID = getActivity().getIntent().getExtras().getLong(CourseData.COURSE_DATA_ID_KEY);
-                if (movieID > 0) {
-                    CourseCollectorTask courseCollector = new CourseCollectorTask(mContext,this);
-                    Long[] params = new Long[1];
-                    params[0] = (Long)movieID;
-                    courseCollector.setNoLocations();
-                    courseCollector.execute(params);
+            Bundle arguments = getArguments();
+            long movieID = 0;
+            if (arguments != null) {
+                movieID = arguments.getLong(CourseData.COURSE_DATA_ID_KEY);
+                mSingleView = false;
+            } else {
+                if (getActivity().getIntent().getExtras() != null) {
+                    movieID = getActivity().getIntent().getExtras().getLong(CourseData.COURSE_DATA_ID_KEY);
                 }
+                mSingleView = true;
+            }
+            if (movieID > 0) {
+                CourseCollectorTask courseCollector = new CourseCollectorTask(mContext,this);
+                Long[] params = new Long[1];
+                params[0] = (Long)movieID;
+                courseCollector.setNoLocations();
+                courseCollector.execute(params);
             }
         }
-
     }
 
         @Override
@@ -98,12 +104,6 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
         View rootView = inflater.inflate(R.layout.fragment_course_overview, container, false);
         ButterKnife.bind(this,rootView);
 
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ActionBar tBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (tBar != null) {
-            tBar.setDisplayHomeAsUpEnabled(true);
-            tBar.setDisplayShowHomeEnabled(true);
-        }
         setHasOptionsMenu(false);
 
         return rootView;
@@ -171,7 +171,11 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
 
                         if (deletedCount == 1){
                             Toast.makeText(getContext(), "Course Deleted", Toast.LENGTH_SHORT).show();
-                            getActivity().onBackPressed();
+                            if (mSingleView) {
+                                getActivity().onBackPressed();
+                            } else {
+                                ((CallBack) getActivity()).courseDeleted();
+                            }
                         } else {
                             Toast.makeText(getContext(), "Unable to Delete Course", Toast.LENGTH_SHORT).show();
                         }
@@ -189,6 +193,7 @@ public class CourseOverviewFragment extends Fragment implements CourseCollectorT
     public interface CallBack {
         void onReviewCourseSelected(long courseID);
         void onCompeteCourseSelected(long courseID);
+        void courseDeleted();
     }
 
     @OnClick(R.id.overview_review_button)

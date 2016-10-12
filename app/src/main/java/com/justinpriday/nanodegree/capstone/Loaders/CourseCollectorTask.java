@@ -113,6 +113,7 @@ public class CourseCollectorTask extends AsyncTask<Long, Void, CourseData> {
                     CourseContract.LocationEntry.COLUMN_LOCATION_ORDER
             );
             try {
+                int pointCount = 1;
                 while (locationCursor.moveToNext()) {
                     CourseLocationData tLoc = new CourseLocationData(locationCursor);
                     if (tLoc.id > 0) {
@@ -127,6 +128,7 @@ public class CourseCollectorTask extends AsyncTask<Long, Void, CourseData> {
                         try {
                             if (kpCursor.moveToFirst()) {
                                 tLoc.keyPointData = new CourseKeyPointData(kpCursor);
+                                tLoc.keyPointData.keyNumber = pointCount++;
                             }
                         } finally {
                             kpCursor.close();

@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'release_keystore'
+            keyPassword 'password'
+            storeFile file('/Users/justin/Dropbox/AndroidSource/Nanodegree/Capstone/releaseKS.jks')
+            storePassword 'password'
+        }
+    }
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
 
@@ -15,6 +23,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -34,8 +43,8 @@ dependencies {
     compile 'com.android.support:cardview-v7:24.2.1'
     compile 'com.android.support:palette-v7:24.2.1'
     compile 'com.android.support:support-annotations:24.2.1'
-    compile 'com.google.android.gms:play-services:9.6.1'
-    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.google.android.gms:play-services-location:9.6.1'
+    compile 'com.google.android.gms:play-services-maps:9.6.1'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.github.AndroidDeveloperLB:AutoFitTextView:3'
     testCompile 'junit:junit:4.12'

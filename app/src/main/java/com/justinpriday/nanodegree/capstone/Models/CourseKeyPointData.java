@@ -31,6 +31,7 @@ public class CourseKeyPointData implements Parcelable {
     public String keyTitle;
     public String keyDescription;
     public boolean keyFlagged;
+    public int keyNumber;
     public int keyFlaggedNumber;
     public int keyFlaggedDistance;
     public Marker keyMarker;

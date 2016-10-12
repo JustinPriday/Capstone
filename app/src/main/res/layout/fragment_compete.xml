@@ -20,75 +20,86 @@
         android:orientation="vertical"
         android:layout_marginTop="?attr/actionBarSize">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:orientation="vertical">
+
+            <include layout="@layout/compete_specs"/>
+
+        </LinearLayout>
+
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
             android:layout_margin="10dp"
-            app:cardCornerRadius="10dp">
-
+            app:cardCornerRadius="@dimen/course_compete_card_cornerradius">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:padding="@dimen/course_compete_card_padding"
                 android:orientation="vertical">
-
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="9"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_key_header"
+                    android:textSize="@dimen/course_compete_key_header_size"/>
 
-                    <TextView
-                        android:id="@+id/compete_text_1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/compete_text_2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/compete_text_3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/compete_text_4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/compete_text_5"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/compete_key_title"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:background="#999999"
-                    android:orientation="horizontal">
-                    <Button
-                        android:id="@+id/compete_start_button"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:enabled="false"
-                        android:text="Start"/>
+                    android:layout_height="wrap_content"
+                    android:text="a Description"
+                    android:textSize="@dimen/course_compete_key_title_size"/>
 
-                    <Button
-                        android:id="@+id/overview_compete_button"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:text="Button2"/>
+                <TextView
+                    android:id="@+id/compete_key_distance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_distance_placeholder"
+                    android:layout_marginTop="@dimen/course_compete_key_distance_paddingtop"
+                    android:textSize="@dimen/course_compete_key_distance_size"/>
 
-                </LinearLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageButton
+                        android:id="@+id/compete_countdown_time_button"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_optimum_timer"
+                        android:contentDescription="@string/course_compete_countdown_time_contentdescription"
+                        android:background="@android:color/transparent"
+                        android:layout_gravity="bottom|right"/>
+
+                </FrameLayout>
             </LinearLayout>
-
         </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/compete_start_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/course_compete_start_button"/>
+
+            <Button
+                android:id="@+id/compete_countdown_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/course_compete_countdown_button"/>
+
+        </LinearLayout>
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

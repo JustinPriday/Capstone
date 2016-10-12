@@ -87,9 +87,8 @@ public class CourseCreateFragment extends Fragment
 
     private OnFragmentInteractionListener mListener;
 
-    private static final int MINIMUM_GPS = 20;
-    private static final int GPS_UPDATE_DISTANCE = 10;
-    private static final int GPS_UPDATE_PERIOD = 1000;
+    private static final int GPS_UPDATE_DISTANCE = 5;
+    private static final int GPS_UPDATE_PERIOD = 0;
 
     private static final String LOG_TAG = CourseCreateFragment.class.getSimpleName();
     private Context mContext;
@@ -471,12 +470,6 @@ public class CourseCreateFragment extends Fragment
             Log.d(LOG_TAG,"Got Current Course");
 //            startButton.setText("Finish");
 //            obstacleButton.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
         }
     }
 

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context="com.justinpriday.nanodegree.capstone.CourseCreateFragment">
 
     <android.support.v7.widget.CardView
@@ -103,24 +104,23 @@
 
             </LinearLayout>
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="4"
+                android:layout_weight="2"
                 android:background="#999999"
-                android:orientation="vertical">
+                android:orientation="horizontal">
                 <Button
                     android:id="@+id/overview_review_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="@string/course_overview_review_button"/>
 
                 <Button
                     android:id="@+id/overview_compete_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="@string/course_overview_compete_button"/>
 
@@ -132,4 +132,3 @@
 
 
 </LinearLayout>
-

@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:padding="0dp"
     android:background="@color/backgroundColor"
+    android:fitsSystemWindows="true"
     tools:context="com.justinpriday.nanodegree.capstone.MainActivity">
 
     <android.support.design.widget.CoordinatorLayout
@@ -14,11 +15,10 @@
         android:layout_height="match_parent"
         android:id="@+id/list_container"
         android:fitsSystemWindows="true">
-
         <android.support.design.widget.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/list_backdrop_height"
+            android:layout_height="80dp"
             android:theme="@style/ToolbarTextColorTheme">
 
             <android.support.design.widget.CollapsingToolbarLayout
@@ -31,7 +31,7 @@
                 app:expandedTitleMarginStart="72dp"
                 app:expandedTitleMarginBottom="40dp"
                 app:collapsedTitleGravity="left"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                app:layout_scrollFlags="snap">
 
                 <ImageView
                     android:layout_width="56dp"
@@ -52,8 +52,6 @@
 
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
-
-
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
@@ -62,14 +60,31 @@
             android:padding="0dp"
             android:background="@color/backgroundColor">
 
-
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/course_list_fragment"
-                android:name="com.justinpriday.nanodegree.capstone.CourseListFragment"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:layout="@layout/fragment_course_list" />
+                android:orientation="horizontal">
+                <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:id="@+id/course_list_fragment"
+                    android:name="com.justinpriday.nanodegree.capstone.CourseListFragment"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    tools:layout="@layout/fragment_course_list" />
+
+                <FrameLayout
+                    android:id="@+id/course_overview_container"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4">
+
+                    <include layout="@layout/select_course"/>
+
+                </FrameLayout>
+
+            </LinearLayout>
+
         </FrameLayout>
 
         <android.support.design.widget.FloatingActionButton

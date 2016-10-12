@@ -1,0 +1,182 @@
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="@dimen/course_compete_card_cornerradius">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/course_compete_card_padding"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="7"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_elapsed_time_label"
+                    android:textSize="@dimen/course_compete_label_text_size" />
+
+                <TextView
+                    android:id="@+id/compete_elapsed_time_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_time_placeholder"
+                    android:textSize="@dimen/course_compete_elapsed_time_size" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_optimum_time_label"
+                    android:textSize="@dimen/course_compete_label_text_size" />
+
+                <TextView
+                    android:id="@+id/compete_optimum_time_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_time_placeholder"
+                    android:textSize="@dimen/course_compete_optimum_time_size" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_remain_time_label"
+                    android:textSize="@dimen/course_compete_label_text_size" />
+
+                <TextView
+                    android:id="@+id/compete_remain_time_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_time_placeholder"
+                    android:textSize="@dimen/course_compete_optimum_time_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/compete_speed_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="00"
+                    android:gravity="right"
+                    android:textSize="@dimen/course_compete_speed_size" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text="@string/course_compete_speed_label"
+                    android:textSize="@dimen/course_compete_label_text_size" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_ave_speed_label"
+                    android:textSize="@dimen/course_compete_label_text_size"/>
+
+                <TextView
+                    android:id="@+id/compete_ave_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_speed_placeholder"
+                    android:textSize="@dimen/course_ave_speed_size"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_req_ave_label"
+                    android:textSize="@dimen/course_compete_label_text_size"/>
+                <TextView
+                    android:id="@+id/compete_req_ave_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_speed_placeholder"
+                    android:textSize="@dimen/course_ave_speed_size"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_distance_label"
+                    android:gravity="right"
+                    android:textSize="@dimen/course_compete_label_text_size"/>
+                <TextView
+                    android:id="@+id/compete_distance_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text="@string/course_compete_distance_placeholder"
+                    android:textSize="@dimen/course_distances_size"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/course_compete_distance_remaining_label"
+                    android:gravity="right"
+                    android:textSize="@dimen/course_compete_label_text_size"/>
+                <TextView
+                    android:id="@+id/compete_distance_remain_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:text="@string/course_compete_distance_placeholder"
+                    android:textSize="@dimen/course_distances_size"/>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
