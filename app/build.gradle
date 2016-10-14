@@ -5,7 +5,7 @@ android {
         release {
             keyAlias 'release_keystore'
             keyPassword 'password'
-            storeFile file('/Users/justin/Dropbox/AndroidSource/Nanodegree/Capstone/releaseKS.jks')
+            storeFile file('../releaseKS.jks')
             storePassword 'password'
         }
     }
